@@ -27,7 +27,7 @@ import { capitalize, toObject } from './utils';
  * @param {import('./karelModel').karelEngine} karelEngine
  */
 export default function karelInterface(karelEngine) {
-  const turns = { front: 0, left: 1, right: -1, around: 2 };
+  const turns = { front: 0, left: -1, right: 1, around: 2 };
   const turnsInterface = Object.keys(turns)
     .map(key => [
       'turn' + capitalize(key),

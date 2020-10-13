@@ -1,15 +1,15 @@
 // import { LitElement, html, css } from 'lit-element';
 
 import directionTransforms from './directionUtils';
-import { toDegrees, vAdd } from './utils';
-
+import { toDegrees, vAdd, vMul } from './utils';
+import { debounce } from 'lodash-es';
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {import('./karelModel').karelState} karelState
  */
-export default (canvas, karelState) => {
+const draw = (canvas, karelState) => {
   const ctx = canvas.getContext('2d');
-
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   const [nrows, ncols] = karelState.dimensions;
   const cellSize = nrows > ncols ? canvas.width / nrows : canvas.height / ncols;
 
@@ -28,7 +28,7 @@ export default (canvas, karelState) => {
   }
 
   function cellHandle(col, row) {
-    return [startX + col * cellSize, startY + row * cellSize];
+    return [startX + col * cellSize, startY + (nrows - row - 1) * cellSize];
   }
   function cellCenter(col, row) {
     return cellHandle(col, row).map(dim => dim + cellSize / 2);
@@ -36,6 +36,7 @@ export default (canvas, karelState) => {
 
   function drawCenter(col, row) {
     const [x, y] = cellCenter(col, row);
+    ctx.fillText(row, x, y);
     line([x + cellSize / 20, y, x - cellSize / 20, y]);
     line([x, y - cellSize / 20, x, y + cellSize / 20]);
   }
@@ -59,11 +60,14 @@ export default (canvas, karelState) => {
         { id: 'Path', fill: '#000000', fillRule: 'nonzero' },
       ],
     ];
-    const { angle, cellCorrection } = directionTransforms(direction);
-    const correctedCells = vAdd(cellCorrection, cell);
-    ctx.translate(...cellHandle(...correctedCells));
+    const { name, angle, cellCorrection } = directionTransforms(direction);
+
+    const correctedCell = vAdd(cellCorrection, cell);
+    ctx.fillText('karel', ...cellHandle(0, 0));
+    ctx.translate(...cellHandle(...correctedCell));
+
     ctx.scale(-1, 1);
-    ctx.fillRect(0, 0, 5, 5);
+    // ctx.fillRect(0, 0, 5, 5);
     ctx.rotate(toDegrees(270 + angle));
     const svgSize = 160;
     const margin = 12;
@@ -97,7 +101,7 @@ export default (canvas, karelState) => {
     const center = cellCenter(...cell);
     const handle = cellHandle(...cell);
     const rightHandle = cellHandle(cell[0] + 1, cell[0]);
-    const bottomHandle = cellHandle(cell[0], cell[1] + 1);
+    const bottomHandle = cellHandle(cell[0], cell[1] - 1);
     ctx.save();
     ctx.moveTo(handle[0], center[1]);
 
@@ -116,3 +120,4 @@ export default (canvas, karelState) => {
     ctx.stroke();
   }
 };
+export default debounce(draw, 50, { cancel: true });

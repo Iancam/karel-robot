@@ -9,47 +9,58 @@ export class KarelIde extends LitElement {
   static get properties() {
     return {
       class: { type: String },
-      title: { type: String },
-      page: { type: String },
     };
-  }
-  constructor() {
-    super();
   }
   get canvas() {
     return this.shadowRoot.querySelector('#canvas');
   }
-  get context() {
-    return this.canvas.getContext('2d');
-  }
-  get speed() {
-    return 0.4;
-  }
-  get maxSpeed() {
-    return 500;
-  }
+
   get starterWorld() {
     return {
-      karel: { cell: [0, 0], direction: 'north' },
+      karel: { cell: [0, 0], direction: 'e' },
       dimensions: [10, 10],
       beepers: [],
     };
   }
-  get starterCode() {
-    return `function main(){
-      move()
-      move()
+
+  starterCode = `function main(){
       turnLeft()
+      move()
+      move()
+      turnRight()
       putBeeper()
       move()
-      if(frontIsClear()){
-        move()
-      } else if(facingEast()){
-        putBeeper()
-      }
-
+      move()
     }`;
+
+  runCode() {
+    const { getDiffs, getStates, engine } = recorderDecorator(
+      karelModel(this.starterWorld),
+      { ignoreUndefined: true, max: 2500 }
+    );
+    const karel = karelInterface(engine);
+    // because this function uses a 'with' statement,
+    // this code cannot be imported in the usual way,
+    // and has to come from global scope
+    _runCode(this.starterCode, karel);
+
+    this.states = getStates();
+    console.log(this.states.map(state => state.karel.direction));
+    console.log(getDiffs());
+    this.stateIndex = 0;
+    const intervalID = setInterval(() => {
+      draw(this.canvas, this.states[this.stateIndex++]);
+      !this.states[this.stateIndex] && clearInterval(intervalID);
+    }, 500);
   }
+
+  updateState(e) {
+    if (!this.states) return;
+    const percent = e.target.value * 0.01;
+    this.stateIndex = Math.floor((this.states.length - 1) * percent);
+    draw(this.canvas, this.states[this.stateIndex]);
+  }
+
   static get styles() {
     return [
       tachyons,
@@ -73,6 +84,7 @@ export class KarelIde extends LitElement {
       canvas.width = width;
       canvas.height = height;
     }
+    draw(this.canvas, (this.states && this.states[0]) || this.starterWorld);
   }
 
   connectedCallback() {
@@ -88,33 +100,21 @@ export class KarelIde extends LitElement {
     this.handleResize();
   }
 
-  theThing() {
-    const { getDiffs, getStates, engine } = recorderDecorator(
-      karelModel(this.starterWorld),
-      { ignoreUndefined: true, max: 2500 }
-    );
-
-    const karel = karelInterface(engine);
-    _runCode(this.starterCode, karel);
-    const diffs = getDiffs();
-    const state = getStates();
-    let i = 0;
-    const intervalID = setInterval(() => {
-      console.log(!(state[i]);
-
-      draw(this.canvas, state[i++]);
-      !state[i] && clearInterval(intervalID);
-    }, 500);
-  }
-
   render() {
     return html`
       <div class="w-100">
         <textarea name="ide" cols="30" rows="10" class="w-40 ma2 h-50 fl">
-          this is *like* an ide
+          ${this.starterCode}
         </textarea
         >
-        <button @click=${this.theThing}>do the thing</button>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          @input=${this.updateState}
+          @change=${() => console.log(this.states[this.stateIndex])}
+        />
+        <button @click=${this.runCode}>do the thing</button>
         <canvas id="canvas" class="square fr"></canvas>
       </div>
     `;

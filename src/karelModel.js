@@ -1,5 +1,6 @@
 import directionTransforms from './directionUtils';
-import { getRegexMatches, vAdd } from './utils';
+import { getRegexMatches, mod, vAdd } from './utils';
+import { cloneDeep } from 'lodash-es';
 /**
  * functions in this file are inspired by the reducer pattern from Redux
  * each function has a shape like this:
@@ -54,11 +55,14 @@ const beepers = ({ beepers }) => {
 
   function toList(beeperLookup) {
     return Object.keys(beeperLookup)
-      .map(x => {
+      .map(x =>
         Object.keys(beeperLookup[x]).map(y => {
-          return { cell: { x, y }, count: beeperLookup[x][y] };
-        });
-      })
+          return {
+            cell: [parseInt(x), parseInt(y)],
+            count: beeperLookup[x][y],
+          };
+        })
+      )
       .flat();
   }
 
@@ -78,6 +82,7 @@ const beepers = ({ beepers }) => {
       xs[cell[1]] = (xs[cell[1]] || 0) + count;
       if (xs[cell[1]] < 0) throw 'karel cannot create anti-beepers (yet)';
     }
+
     return toList(beeperLookup);
   }
 
@@ -89,17 +94,18 @@ const beepers = ({ beepers }) => {
  * @param {{karel:karel}}
  */
 const karel = ({ karel }, validateSquare) => {
-  let karelState = karel;
-
+  let karelState = cloneDeep(karel);
+  karelState.direction = directionTransforms(karelState.direction).index;
   /**
    * @param {diff} param0
    */
   const diffHandler = ({ move, turn }) => {
-    karelState.direction = turn || karelState.direction;
+    const newDirection = mod(karelState.direction + turn, 4);
+    turn && (karelState.direction = newDirection);
+
     if (move) {
-      const newCell = vAdd(karel.cell, move);
-      validateSquare(newCell) && (karel.cell = newCell);
-      karelState.cell = newCell;
+      const newCell = vAdd(karelState.cell, move);
+      validateSquare(newCell) && (karelState.cell = newCell);
     }
     return karelState;
   };
@@ -111,7 +117,6 @@ const karel = ({ karel }, validateSquare) => {
  *  @param {karelState} initialState
  */
 export default initialState => {
-  // let state = initialState;
   const checkCell = validSquare(initialState);
   const { diffHandler: changeBeepers, checkCell: beepersAt } = beepers(
     initialState
@@ -124,12 +129,14 @@ export default initialState => {
    * this means a list of diffs it'll be easy to do time travel!
    */
   const returnValue = diff => {
+    const karel = changeKarel(diff || {});
+    console.log({ diff, karel });
     return {
       ...initialState,
       checkCell,
       beepersAt,
       beepers: changeBeepers(diff || {}),
-      karel: changeKarel(diff || {}),
+      karel,
     };
   };
   return returnValue;

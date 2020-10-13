@@ -8,15 +8,15 @@ import { cloneDeep } from 'lodash-es';
  */
 export const recorderDecorator = (diffEngine, options) => {
   let diffs = [];
-  let states = [diffEngine()];
-
+  let states = [cloneDeep(diffEngine())];
   return {
     getStates: () => states,
     getDiffs: () => diffs,
-    engine: (diff, lineNumber) => {
+    engine: diff => {
       if (!options.ignoreUndefined || diff) {
         diffs.push({ ...diff });
         const nextState = diffEngine(diff);
+        console.log({ diff, karel: nextState });
         states.push(cloneDeep(nextState));
       }
       return last(states);
