@@ -45,18 +45,17 @@ export class KarelIde extends LitElement {
     // because this function uses a 'with' statement,
     // this code cannot be imported in the usual way,
     // and has to come from global scope
-    interpret(await getCode(), karel);
+
+    this.interpret(await this.getCode(), karel);
 
     this.states = getStates();
-    console.log(this.states.map(state => state.karel.direction));
-    console.log(getDiffs());
     this.stateIndex = 0;
     const intervalID = setInterval(() => {
       if (!this.states || !this.states[this.stateIndex]) {
-        draw(this.canvas, this.starterWorld);
+        // draw(this.canvas, this.starterWorld());
         return clearInterval(intervalID);
       }
-
+      console.log(this.states.length, this.stateIndex);
       draw(this.canvas, this.states[this.stateIndex++]);
     }, 500);
   }

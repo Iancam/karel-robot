@@ -1,3 +1,4 @@
+import { Karel } from './karelInterface';
 function createKarelProposals(language, range) {
   // returning a static list of proposals, not even looking at the prefix (filtering is done by the Monaco editor),
   // here you could do a server side lookup
@@ -32,7 +33,7 @@ function createKarelProposals(language, range) {
   return [...instructions, ...predicates];
 }
 
-async function addEditor(id, options) {
+export async function addEditor(id, options) {
   require.config({ paths: { vs: './node_modules/monaco-editor/min/vs' } });
   return new Promise((res, rej) => {
     require(['vs/editor/editor.main'], function () {
@@ -75,8 +76,6 @@ async function addEditor(id, options) {
           localStorage.setItem(window.location.href, model.getValue());
         });
       }
-      editor._editorType = 'monaco';
-      window._editor = editor;
       res(editor);
     });
   });

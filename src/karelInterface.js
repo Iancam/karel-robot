@@ -1,26 +1,26 @@
 import directionTranslator, { directions } from './directionUtils';
-import karelModelFactory from './karelModel';
 import { capitalize, toObject } from './utils';
 
-// Karel.instructions = {
-//   move: 1,
-//   turnLeft: 1,
-//   putBeeper: 1,
-//   pickBeeper: 1,
-//   turnRight: 2,
-//   turnAround: 2,
-// };
-
-// Karel.predicates = {
-//   frontIsClear: 1,
-//   leftIsClear: 1,
-//   rightIsClear: 1,
-//   beepersPresent: 1,
-//   facingNorth: 1,
-//   facingEast: 1,
-//   facingSouth: 1,
-//   facingWest: 1,
-// };
+export const Karel = {
+  instructions: {
+    move: 1,
+    turnLeft: 1,
+    putBeeper: 1,
+    pickBeeper: 1,
+    turnRight: 2,
+    turnAround: 2,
+  },
+  predicates: {
+    frontIsClear: 1,
+    leftIsClear: 1,
+    rightIsClear: 1,
+    beepersPresent: 1,
+    facingNorth: 1,
+    facingEast: 1,
+    facingSouth: 1,
+    facingWest: 1,
+  },
+};
 
 /**
  * @param {import("./karelModel").karelState} initialState

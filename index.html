@@ -13,16 +13,17 @@
       integrity="sha256-0SGl1PJNDyJwcV5T+weg2zpEMrh7xvlwO4oXgvZCeZk="
       crossorigin="anonymous"
     ></script>
-    <script src="./src/editor.js"></script>
+    <script type="module" src="./src/editor.js"></script>
     <link rel="stylesheet" href="./css/tachyons.css" />
     <link rel="stylesheet" href="./css/utils.css" />
     <title>karel-ide</title>
   </head>
   <body>
     <div id="editor" class="absolute ma4 square b--black ba br2"></div>
-
+    <script src="./src/interpreter.js"></script>
     <karel-ide id="karel" class="w-50 fr"></karel-ide>
-    <script>
+    <script type="module">
+      import { addEditor } from './src/editor.js';
       let editor = addEditor('editor', {
         language: 'javascript',
         code: `function main(){
@@ -39,9 +40,13 @@
       async function getCode() {
         return (await editor).getModel().getValue();
       }
-      document.querySelector('#karel').getCode = getCode;
+      const interpret = _runCode;
+      let karel = document.querySelector('#karel');
+      karel.getCode = getCode;
+      console.log(_runCode);
+      karel.interpret = interpret;
     </script>
-    <script src="./src/interpreter.js"></script>
+
     <script type="module" src="./src/karel-ide.js"></script>
   </body>
 </html>
