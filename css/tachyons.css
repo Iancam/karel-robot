@@ -986,7 +986,7 @@ code, .code { font-family: Consolas, monaco, monospace; }
 .w-33 { width: 33%; }
 .w-34 { width: 34%; }
 .w-40 { width: 40%; }
-.w-50 { width: 50%; }
+.w-50 {width: 50%;height: 100;}
 .w-60 { width: 60%; }
 .w-70 { width: 70%; }
 .w-75 { width: 75%; }

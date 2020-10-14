@@ -8,11 +8,39 @@
     />
     <meta name="Description" content="YA Karel the robot implementation" />
     <base href="/" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"
+      integrity="sha256-0SGl1PJNDyJwcV5T+weg2zpEMrh7xvlwO4oXgvZCeZk="
+      crossorigin="anonymous"
+    ></script>
+    <script src="./src/editor.js"></script>
     <link rel="stylesheet" href="./css/tachyons.css" />
+    <link rel="stylesheet" href="./css/utils.css" />
     <title>karel-ide</title>
   </head>
   <body>
-    <karel-ide class="w-50 center"></karel-ide>
+    <div id="editor" class="absolute ma4 square b--black ba br2"></div>
+
+    <karel-ide id="karel" class="w-50 fr"></karel-ide>
+    <script>
+      let editor = addEditor('editor', {
+        language: 'javascript',
+        code: `function main(){
+      turnLeft()
+      move()
+      move()
+      turnRight()
+      putBeeper()
+      move()
+      move()
+    }`,
+      });
+
+      async function getCode() {
+        return (await editor).getModel().getValue();
+      }
+      document.querySelector('#karel').getCode = getCode;
+    </script>
     <script src="./src/interpreter.js"></script>
     <script type="module" src="./src/karel-ide.js"></script>
   </body>

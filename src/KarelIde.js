@@ -8,14 +8,17 @@ import { recorderDecorator } from './recorderDecorator';
 export class KarelIde extends LitElement {
   static get properties() {
     return {
+      interpret: { type: Function },
+      getCode: { type: Function },
       class: { type: String },
+      // beforeRun: { type: Function },
     };
   }
   get canvas() {
     return this.shadowRoot.querySelector('#canvas');
   }
 
-  get starterWorld() {
+  starterWorld() {
     return {
       karel: { cell: [0, 0], direction: 'e' },
       dimensions: [10, 10],
@@ -33,24 +36,28 @@ export class KarelIde extends LitElement {
       move()
     }`;
 
-  runCode() {
+  async runCode() {
     const { getDiffs, getStates, engine } = recorderDecorator(
-      karelModel(this.starterWorld),
+      karelModel(this.starterWorld()),
       { ignoreUndefined: true, max: 2500 }
     );
     const karel = karelInterface(engine);
     // because this function uses a 'with' statement,
     // this code cannot be imported in the usual way,
     // and has to come from global scope
-    _runCode(this.starterCode, karel);
+    interpret(await getCode(), karel);
 
     this.states = getStates();
     console.log(this.states.map(state => state.karel.direction));
     console.log(getDiffs());
     this.stateIndex = 0;
     const intervalID = setInterval(() => {
+      if (!this.states || !this.states[this.stateIndex]) {
+        draw(this.canvas, this.starterWorld);
+        return clearInterval(intervalID);
+      }
+
       draw(this.canvas, this.states[this.stateIndex++]);
-      !this.states[this.stateIndex] && clearInterval(intervalID);
     }, 500);
   }
 
@@ -60,7 +67,9 @@ export class KarelIde extends LitElement {
     this.stateIndex = Math.floor((this.states.length - 1) * percent);
     draw(this.canvas, this.states[this.stateIndex]);
   }
-
+  reset() {
+    this.states = undefined;
+  }
   static get styles() {
     return [
       tachyons,
@@ -84,7 +93,7 @@ export class KarelIde extends LitElement {
       canvas.width = width;
       canvas.height = height;
     }
-    draw(this.canvas, (this.states && this.states[0]) || this.starterWorld);
+    draw(this.canvas, (this.states && this.states[0]) || this.starterWorld());
   }
 
   connectedCallback() {
@@ -102,19 +111,17 @@ export class KarelIde extends LitElement {
 
   render() {
     return html`
-      <div class="w-100">
-        <textarea name="ide" cols="30" rows="10" class="w-40 ma2 h-50 fl">
-          ${this.starterCode}
-        </textarea
-        >
+      <div class=${this.class}>
         <input
           type="range"
           min="0"
-          max="100"
+          max=${this.states ? this.states.length - 1 : 0}
+          step="1"
           @input=${this.updateState}
           @change=${() => console.log(this.states[this.stateIndex])}
         />
-        <button @click=${this.runCode}>do the thing</button>
+        <button @click=${this.runCode}>Run</button>
+        <button @click=${this.reset}>Reset</button>
         <canvas id="canvas" class="square fr"></canvas>
       </div>
     `;

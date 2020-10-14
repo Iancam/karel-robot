@@ -1,0 +1,4 @@
+.square {
+  width: min(50vw, 100vh);
+  height: min(50vw, 100vh);
+}
