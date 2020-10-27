@@ -113,7 +113,7 @@ const karel = ({ karel }, validateSquare) => {
 };
 
 /**
- * @typedef {(karelState)=>(diff)=>karelState} karelModelFactory
+ * @typedef {(karelState)=>(diff:diff)=>karelState} karelModelFactory
  *  @param {karelState} initialState
  */
 export default initialState => {
@@ -130,7 +130,6 @@ export default initialState => {
    */
   const returnValue = diff => {
     const karel = changeKarel(diff || {});
-    console.log({ diff, karel });
     return {
       ...initialState,
       checkCell,
