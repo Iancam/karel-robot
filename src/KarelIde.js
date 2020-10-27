@@ -4,19 +4,28 @@ import karelInterface from './karelInterface';
 import karelModel from './karelModel';
 import draw from './karelView';
 import { recorderDecorator } from './recorderDecorator';
-
+import { javascriptify, pythonGlobals } from './pythonTranslator';
+import { addLineIndexMiddleware, addLineNumbers } from './addLineNumbers';
 export class KarelIde extends LitElement {
   static get properties() {
     return {
       interpret: { type: Function },
-      getCode: { type: Function },
+      editor: { type: Object },
       class: { type: String },
+      states: { type: Array },
+      stateIndex: { type: Number },
       // beforeRun: { type: Function },
     };
   }
   get canvas() {
     return this.shadowRoot.querySelector('#canvas');
   }
+
+  languages = [
+    { index: 0, value: 'python', text: 'Python' },
+    { index: 1, value: 'javascript', text: 'JavaScript' },
+  ];
+  language = 'python';
 
   starterWorld() {
     return {
@@ -26,56 +35,65 @@ export class KarelIde extends LitElement {
     };
   }
 
-  starterCode = `function main(){
-      turnLeft()
-      move()
-      move()
-      turnRight()
-      putBeeper()
-      move()
-      move()
-    }`;
-
   async runCode() {
+    const code = (await this.editor).getCode();
+    const languageMap = { python: javascriptify, javascript: code => code };
+    const transpiledCode = languageMap[this.language](code);
+    const lineNumberCode = addLineNumbers(transpiledCode);
     const { getDiffs, getStates, engine } = recorderDecorator(
       karelModel(this.starterWorld()),
       { ignoreUndefined: true, max: 2500 }
     );
-    const karel = karelInterface(engine);
-    // because this function uses a 'with' statement,
-    // this code cannot be imported in the usual way,
-    // and has to come from global scope
-
-    this.interpret(await this.getCode(), karel);
-
+    const karel = karelInterface(engine, {
+      middleware: [addLineIndexMiddleware],
+    });
+    this.interpret(lineNumberCode, karel, pythonGlobals);
     this.states = getStates();
-    this.stateIndex = 0;
-    const intervalID = setInterval(() => {
-      if (!this.states || !this.states[this.stateIndex]) {
-        // draw(this.canvas, this.starterWorld());
+    this.diffs = getDiffs();
+  }
+
+  animateDiffs() {
+    this.index = 0;
+    const intervalID = setInterval(async () => {
+      if (!(await this.updateState(this.index++))) {
         return clearInterval(intervalID);
       }
-      console.log(this.states.length, this.stateIndex);
-      draw(this.canvas, this.states[this.stateIndex++]);
     }, 500);
   }
 
-  updateState(e) {
-    if (!this.states) return;
-    const percent = e.target.value * 0.01;
-    this.stateIndex = Math.floor((this.states.length - 1) * percent);
+  async updateState(value) {
+    if (!this.states?.[value]) return false;
+    this.stateIndex = value;
+    this.diffIndex = value - 1;
+    (await this.editor).highlightLine(
+      this.diffs[this.diffIndex]?.lineNumber,
+      'bg-gold'
+    );
     draw(this.canvas, this.states[this.stateIndex]);
+    return true;
   }
-  reset() {
-    this.states = undefined;
+
+  async reset() {
+    this.updateState(0);
   }
+
   static get styles() {
     return [
       tachyons,
       css`
         .square {
-          width: min(50vw, 100vh);
-          height: min(50vw, 100vh);
+          width: min(50vw, 90vh);
+          height: min(50vw, 90vh);
+        }
+        .vh-10 {
+          height: 10vh;
+        }
+        .overflow-hidden {
+          overflow-x: hidden;
+          overflow-y: hidden;
+        }
+        .fr {
+          float: right;
         }
       `,
     ];
@@ -108,19 +126,44 @@ export class KarelIde extends LitElement {
     this.handleResize();
   }
 
+  updateLanguage(e) {
+    this.language = e.target.value;
+  }
+
   render() {
     return html`
       <div class=${this.class}>
-        <input
-          type="range"
-          min="0"
-          max=${this.states ? this.states.length - 1 : 0}
-          step="1"
-          @input=${this.updateState}
-          @change=${() => console.log(this.states[this.stateIndex])}
-        />
-        <button @click=${this.runCode}>Run</button>
-        <button @click=${this.reset}>Reset</button>
+        <div class="vh-10 overflow-hidden">
+          <input
+            type="range"
+            min="0"
+            value=${this.stateIndex}
+            max=${this.states ? this.states.length - 1 : 0}
+            step="1"
+            @input=${e => this.updateState(e.target.value)}
+            @change=${() => console.log(this.states[this.stateIndex])}
+          />
+          <select name="language" @change=${this.updateLanguage}>
+            ${this.languages.map(
+              ({ value, text }) =>
+                html`<option
+                  ?selected=${this.languageId === value}
+                  value=${value}
+                >
+                  ${text}
+                </option>`
+            )}
+          </select>
+          <button
+            @click=${async () => {
+              await this.runCode();
+              this.animateDiffs();
+            }}
+          >
+            Run
+          </button>
+          <button class="fr" @click=${this.reset}>Reset</button>
+        </div>
         <canvas id="canvas" class="square fr"></canvas>
       </div>
     `;
