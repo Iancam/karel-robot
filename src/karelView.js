@@ -15,6 +15,7 @@ const draw = (canvas, karelState) => {
 
   const [startX, endX] = worldBounds(canvas.width, ncols, cellSize);
   const [startY, endY] = worldBounds(canvas.height, nrows, cellSize);
+
   drawKarel(karelState.karel);
   drawWorld(karelState);
   karelState.beepers.forEach(drawBeeper);
@@ -102,7 +103,7 @@ const draw = (canvas, karelState) => {
     const handle = cellHandle(...cell);
     const rightHandle = cellHandle(cell[0] + 1, cell[0]);
     const bottomHandle = cellHandle(cell[0], cell[1] - 1);
-    ctx.save();
+    ctx.beginPath();
     ctx.moveTo(handle[0], center[1]);
 
     ctx.lineTo(center[0], handle[1]);
@@ -110,14 +111,16 @@ const draw = (canvas, karelState) => {
     ctx.lineTo(center[0], bottomHandle[1]);
     ctx.lineTo(handle[0], center[1]);
     ctx.stroke();
-    ctx.restore();
+    ctx.closePath();
   }
 
   function line(coords) {
     const [x, y, x1, y1] = coords;
+    ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x1, y1);
     ctx.stroke();
+    ctx.closePath();
   }
 };
 export default debounce(draw, 50, { cancel: true });
