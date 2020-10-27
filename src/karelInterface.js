@@ -1,6 +1,6 @@
 import directionTranslator, { directions } from './directionUtils';
 import { capitalize, toObject } from './utils';
-
+import { flowRight, flow } from 'lodash-es';
 export const Karel = {
   instructions: {
     move: 1,
@@ -23,16 +23,22 @@ export const Karel = {
 };
 
 /**
- * @param {import("./karelModel").karelState} initialState
  * @param {import('./karelModel').karelEngine} karelEngine
+ *
  */
-export default function karelInterface(karelEngine) {
+export default function karelInterface(karelEngine, options = {}) {
+  const updateEngine = func => {
+    return args => {
+      const [diff, val] = func(args);
+      karelEngine(diff);
+      return val;
+    };
+  };
+  // middleware (func)=>([diff, val, ...rest])=>[diff, val, ...rest]
+  const middleware = [...options.middleware, updateEngine];
   const turns = { front: 0, left: -1, right: 1, around: 2 };
   const turnsInterface = Object.keys(turns)
-    .map(key => [
-      'turn' + capitalize(key),
-      () => karelEngine({ turn: turns[key] }),
-    ])
+    .map(key => ['turn' + capitalize(key), () => [{ turn: turns[key] }]])
     .reduce(toObject, {});
 
   const clearInterface = Object.keys(turns)
@@ -43,10 +49,12 @@ export default function karelInterface(karelEngine) {
         const { checkCell, karel } = karelEngine();
         const adjunctCell = directionTranslator(karel.direction + turns[key])
           .move;
-        karelEngine({
-          [funcName]: adjunctCell,
-        });
-        return checkCell(adjunctCell);
+        return [
+          {
+            [funcName]: adjunctCell,
+          },
+          checkCell(adjunctCell),
+        ];
       },
     ])
     .reduce(toObject, {});
@@ -54,8 +62,10 @@ export default function karelInterface(karelEngine) {
   const facingInterface = directions
     .map(({ name }, i) => [
       'facing' + capitalize(name),
-      () =>
-        karelEngine({ ['facing' + capitalize(name)]: i }).karel.direction === i,
+      () => [
+        { ['facing' + capitalize(name)]: i },
+        karelEngine().karel.direction === i,
+      ],
     ])
     .reduce(toObject, {});
 
@@ -65,20 +75,28 @@ export default function karelInterface(karelEngine) {
     ...turnsInterface,
     move: () => {
       const { direction } = karelEngine().karel;
-      karelEngine({
-        move: directionTranslator(direction).move,
-      });
+      return [
+        {
+          move: directionTranslator(direction).move,
+        },
+      ];
     },
     putBeeper: () => {
-      karelEngine({ beeper: { cell: karelEngine().karel.cell, count: 1 } });
+      return [{ beeper: { cell: karelEngine().karel.cell, count: 1 } }];
     },
     pickBeeper: () => {
-      karelEngine({ beeper: { cell: karelEngine().karel.cell, count: -1 } });
+      return [{ beeper: { cell: karelEngine().karel.cell, count: -1 } }];
     },
     beepersPresent: () => {
-      const { karel, beepersAt } = karelEngine({ beepersPresent: karel.cell });
-      return beepersAt(karel.cell).count;
+      return [{ beepersPresent: karel.cell }, beepersAt(karel.cell).count];
     },
   };
-  return karelInterface;
+
+  return Object.entries(karelInterface)
+    .map(([k, func]) => {
+      Object.defineProperty(func, 'name', { value: k });
+      const withMiddleware = flow(middleware)(func);
+      return [k, withMiddleware];
+    })
+    .reduce(toObject, {});
 }
