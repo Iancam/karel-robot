@@ -1,0 +1,20 @@
+create api server (/api) √
+  
+
+
+create a remote session
+  generate key to share
+    create a new channel with a 6 digit id
+    make monaco publish edits to the channel:
+      editor.onDidChangeModelContent(function (e) { //Text Change
+        if (issocket == false) {
+            socket.emit('key', e)
+        } else
+            issocket = false
+      })
+      editor.onDidChangeCursorSelection(function (e) {    //Cursor or Selection Change
+          socket.emit('selection', e)
+      })
+join a remote session
+  enter 6 digit key
+    pusher connect to events on 6digit channel
