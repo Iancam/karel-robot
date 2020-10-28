@@ -112,27 +112,25 @@ export class KarelIde extends LitElement {
     }
     draw(this.canvas, (this.states && this.states[0]) || this.starterWorld());
   }
+
+  onSave(e) {
+    const modifier = window.navigator.platform.match('Mac')
+      ? e.metaKey
+      : e.ctrlKey;
+    if (e.key === 's' && modifier) {
+      this.editor.then(editor =>
+        editor.save(window.prompt('What shall we call your file?'), {
+          language: this.language,
+          world: this.world,
+        })
+      );
+      e.preventDefault();
+    }
+  }
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener('resize', this.handleResize.bind(this));
-    window.addEventListener(
-      'keydown',
-      function (e) {
-        const modifier = window.navigator.platform.match('Mac')
-          ? e.metaKey
-          : e.ctrlKey;
-        if (e.key === 's' && modifier) {
-          this.editor.then(editor =>
-            editor.save(window.prompt('What shall we call your file?'), {
-              language: this.language,
-              world: this.world,
-            })
-          );
-          e.preventDefault();
-        }
-      }.bind(this),
-      false
-    );
+    window.addEventListener('keydown', this.onSave.bind(this), false);
   }
   disconnectedCallback() {
     window.removeEventListener('resize', this.handleResize.bind(this));
@@ -144,8 +142,9 @@ export class KarelIde extends LitElement {
     this.handleResize();
   }
 
-  updateLanguage(e) {
+  async updateLanguage(e) {
     this.language = e.target.value;
+    (await this.editor).setLanguage(this.language);
   }
 
   render() {
