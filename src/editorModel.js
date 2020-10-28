@@ -47,16 +47,22 @@ export async function EditorModel(monacoEditor) {
       return editor.executeEdits('my-source', [op]);
     },
 
-    saveEdits: function (shouldSave) {
+    save: function (fileName, options) {
       const model = editor.getModel();
-      model._languageIdentifier.language;
-      const saveFx = () => {
-        localStorage.setItem(
-          window.location.href + '?lang=' + model._languageIdentifier.language,
-          model.getValue()
-        );
-      };
-      model.onDidChangeContent(shouldSave ? saveFx : () => {});
+      localStorage.setItem(
+        fileName,
+        JSON.stringify({ code: model.getValue(), ...options })
+      );
+    },
+
+    load: function (fileName) {
+      const results = JSON.parse(localStorage.getItem(fileName));
+      this.setCode(results.code);
+      return results;
+    },
+
+    listFiles: function () {
+      return localStorage.getItem('files');
     },
   };
 }
