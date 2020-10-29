@@ -65,5 +65,8 @@ export async function EditorModel(monacoEditor) {
         .filter(k => k.startsWith('file::'))
         .map(k => k.slice(6));
     },
+    remove: function (fname) {
+      localStorage.removeItem('file::' + fname);
+    },
   };
 }

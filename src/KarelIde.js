@@ -122,7 +122,7 @@ export class KarelIde extends LitElement {
         world: this.world,
         date: new Date(),
       });
-
+      this.requestUpdate();
       e.preventDefault();
     }
   }
@@ -186,12 +186,18 @@ export class KarelIde extends LitElement {
         ${sidebar(
           this.files.map(fileName => this.editor.load(fileName)),
           this.sidebarExpanded,
+          () => {
+            this.sidebarExpanded = !this.sidebarExpanded;
+            this.requestUpdate();
+          },
           fname => {
             this.editor.setCode(this.editor.load(fname).code);
             alert('loaded!');
           },
-          () => {
-            this.sidebarExpanded = !this.sidebarExpanded;
+          fname => {
+            console.log('goodbye', fname);
+
+            this.editor.remove(fname);
             this.requestUpdate();
           }
         )}

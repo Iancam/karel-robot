@@ -1,7 +1,13 @@
 import { html } from 'lit-element';
 import dayjs from 'dayjs/esm';
 
-export function sidebar(files, expanded, fileClicked, expandClicked) {
+export function sidebar(
+  files,
+  expanded,
+  expandClicked,
+  fileClicked,
+  removeClicked
+) {
   return html`
     <div class="">
       <div
@@ -12,22 +18,29 @@ export function sidebar(files, expanded, fileClicked, expandClicked) {
         <div
           @click=${expandClicked}
           class="${expanded
-            ? 'bg-orange hover-bg-gold'
-            : 'bg-gold hover-bg-orange'} bg-animate pointer w2 h2"
+            ? 'bg-gold hover-bg-orange'
+            : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
         ></div>
 
         ${expanded
           ? files.map(({ name, language, world, date }) => {
               return html` <div
-                class="ba b--black bg-black-10 pa3 link underline hover-orange pointer"
-                @click=${() => fileClicked(name)}
-              >
-                <h3>${name}</h3>
-                <div class="f4 dib">${language}</div>
-                <div class="dib f6 fw1 fr italic hover-orange avenir">
-                  ${dayjs(date).format('dddd [the] D[,] MMM YYYY')}
-                </div>
-              </div>`;
+                  @click=${() => removeClicked(name)}
+                  class="hover-bg-black bg-animate pointer fr mt0 bg-dark-red w2 h2 bt br"
+                ></div>
+                <div
+                  class="ba b--black bg-black-10 pa3 link avenir hover-orange pointer"
+                  @click=${() => fileClicked(name)}
+                >
+                  <span class="f3 mt0">${name}</span>
+                  <br />
+                  <div class="f5 dib mt2">
+                    ${language}
+                    <span class="f7 fw1 italic"
+                      >${dayjs(date).format('dddd [the] D [of] MMM YYYY')}</span
+                    >
+                  </div>
+                </div>`;
             })
           : ''}
       </div>
