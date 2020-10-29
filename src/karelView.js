@@ -37,7 +37,6 @@ const draw = (canvas, karelState) => {
 
   function drawCenter(col, row) {
     const [x, y] = cellCenter(col, row);
-    ctx.fillText(row, x, y);
     line([x + cellSize / 20, y, x - cellSize / 20, y]);
     line([x, y - cellSize / 20, x, y + cellSize / 20]);
   }
@@ -64,7 +63,6 @@ const draw = (canvas, karelState) => {
     const { name, angle, cellCorrection } = directionTransforms(direction);
 
     const correctedCell = vAdd(cellCorrection, cell);
-    ctx.fillText('karel', ...cellHandle(0, 0));
     ctx.translate(...cellHandle(...correctedCell));
 
     ctx.scale(-1, 1);
@@ -103,6 +101,7 @@ const draw = (canvas, karelState) => {
     const handle = cellHandle(...cell);
     const rightHandle = cellHandle(cell[0] + 1, cell[0]);
     const bottomHandle = cellHandle(cell[0], cell[1] - 1);
+
     ctx.beginPath();
     ctx.moveTo(handle[0], center[1]);
 
@@ -110,8 +109,11 @@ const draw = (canvas, karelState) => {
     ctx.lineTo(rightHandle[0], center[1]);
     ctx.lineTo(center[0], bottomHandle[1]);
     ctx.lineTo(handle[0], center[1]);
+    ctx.fillStyle = 'cyan';
+    ctx.fill();
     ctx.stroke();
     ctx.closePath();
+    ctx.fillText(count, ...center);
   }
 
   function line(coords) {

@@ -21,7 +21,7 @@
   <body>
     <div id="editor" class="absolute ma4 square b--black ba br2"></div>
     <script src="./src/interpreter.js"></script>
-    <karel-ide id="karel" class="w-50 fr mb3 mr3"></karel-ide>
+    <karel-ide id="karel" class="mb3 mr3 fr"></karel-ide>
     <script type="module">
       import { addEditor } from './src/editor.js';
       import { EditorModel } from './src/editorModel.js';
@@ -40,7 +40,7 @@
       });
       let karel = document.querySelector('#karel');
       karel.interpret = _runCode;
-      karel.editor = EditorModel(editor);
+      EditorModel(editor).then(editor => (karel.editor = editor));
     </script>
 
     <script type="module" src="./src/karel-ide.js"></script>

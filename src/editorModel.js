@@ -50,19 +50,20 @@ export async function EditorModel(monacoEditor) {
     save: function (fileName, options) {
       const model = editor.getModel();
       localStorage.setItem(
-        fileName,
-        JSON.stringify({ code: model.getValue(), ...options })
+        'file::' + fileName,
+        JSON.stringify({ code: model.getValue(), name: fileName, ...options })
       );
     },
 
     load: function (fileName) {
-      const results = JSON.parse(localStorage.getItem(fileName));
-      this.setCode(results.code);
+      const results = JSON.parse(localStorage.getItem('file::' + fileName));
       return results;
     },
 
     listFiles: function () {
-      return localStorage.getItem('files');
+      return Object.keys(localStorage)
+        .filter(k => k.startsWith('file::'))
+        .map(k => k.slice(6));
     },
   };
 }

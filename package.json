@@ -41,7 +41,6 @@
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix",
       "prettier --write",
       "git add"
     ]
@@ -53,6 +52,7 @@
   "license": "MIT",
   "dependencies": {
     "@atomist/microgrammar": "^1.2.1",
+    "dayjs": "^1.9.4",
     "lit-element": "^2.0.1",
     "lit-html": "^1.0.0",
     "lodash": "^4.17.20",

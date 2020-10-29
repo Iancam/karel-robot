@@ -6,6 +6,7 @@ import draw from './karelView';
 import { recorderDecorator } from './recorderDecorator';
 import { javascriptify, pythonGlobals } from './pythonTranslator';
 import { addLineIndexMiddleware, addLineNumbers } from './addLineNumbers';
+import { sidebar } from './sidebar';
 export class KarelIde extends LitElement {
   static get properties() {
     return {
@@ -14,11 +15,18 @@ export class KarelIde extends LitElement {
       class: { type: String },
       states: { type: Array },
       stateIndex: { type: Number },
+      files: { type: Array },
+      sidebarExpanded: { type: Boolean },
       // beforeRun: { type: Function },
     };
   }
+  sidebarExpanded = true;
   get canvas() {
     return this.shadowRoot.querySelector('#canvas');
+  }
+
+  get files() {
+    return this.editor.listFiles();
   }
 
   languages = [
@@ -34,7 +42,6 @@ export class KarelIde extends LitElement {
       beepers: [],
     };
   }
-
   async runCode() {
     const code = (await this.editor).getCode();
     const languageMap = { python: javascriptify, javascript: code => code };
@@ -51,7 +58,6 @@ export class KarelIde extends LitElement {
     this.states = getStates();
     this.diffs = getDiffs();
   }
-
   animateDiffs() {
     this.index = 0;
     const intervalID = setInterval(async () => {
@@ -61,11 +67,11 @@ export class KarelIde extends LitElement {
     }, 500);
   }
 
-  async updateState(value) {
+  updateState(value) {
     if (!this.states?.[value]) return false;
     this.stateIndex = value;
     this.diffIndex = value - 1;
-    (await this.editor).highlightLine(
+    this.editor.highlightLine(
       this.diffs[this.diffIndex]?.lineNumber,
       'bg-gold'
     );
@@ -85,15 +91,8 @@ export class KarelIde extends LitElement {
           width: min(50vw, 90vh);
           height: min(50vw, 90vh);
         }
-        .vh-10 {
-          height: 10vh;
-        }
-        .overflow-hidden {
-          overflow-x: hidden;
-          overflow-y: hidden;
-        }
-        .fr {
-          float: right;
+        .mr-25 {
+          margin-right: 25vw;
         }
       `,
     ];
@@ -118,12 +117,12 @@ export class KarelIde extends LitElement {
       ? e.metaKey
       : e.ctrlKey;
     if (e.key === 's' && modifier) {
-      this.editor.then(editor =>
-        editor.save(window.prompt('What shall we call your file?'), {
-          language: this.language,
-          world: this.world,
-        })
-      );
+      this.editor.save(window.prompt('What shall we call your file?'), {
+        language: this.language,
+        world: this.world,
+        date: new Date(),
+      });
+
       e.preventDefault();
     }
   }
@@ -144,7 +143,7 @@ export class KarelIde extends LitElement {
 
   async updateLanguage(e) {
     this.language = e.target.value;
-    (await this.editor).setLanguage(this.language);
+    this.editor.setLanguage(this.language);
   }
 
   render() {
@@ -158,7 +157,6 @@ export class KarelIde extends LitElement {
             max=${this.states ? this.states.length - 1 : 0}
             step="1"
             @input=${e => this.updateState(e.target.value)}
-            @change=${() => console.log(this.states[this.stateIndex])}
           />
           <select name="language" @change=${this.updateLanguage}>
             ${this.languages.map(
@@ -179,9 +177,24 @@ export class KarelIde extends LitElement {
           >
             Run
           </button>
-          <button class="fr" @click=${this.reset}>Reset</button>
+          <button class="" @click=${this.reset}>Reset</button>
         </div>
-        <canvas id="canvas" class="square fr"></canvas>
+        <canvas
+          id="canvas"
+          class="square fr ${this.sidebarExpanded ? 'mr-25' : 'mr2'}"
+        ></canvas>
+        ${sidebar(
+          this.files.map(fileName => this.editor.load(fileName)),
+          this.sidebarExpanded,
+          fname => {
+            this.editor.setCode(this.editor.load(fname).code);
+            alert('loaded!');
+          },
+          () => {
+            this.sidebarExpanded = !this.sidebarExpanded;
+            this.requestUpdate();
+          }
+        )}
       </div>
     `;
   }
