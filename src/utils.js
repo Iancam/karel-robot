@@ -7,6 +7,9 @@ export const vDiv = (vec1, vec2) => vec1.map((val, i) => val / vec2[i]);
 export const vMul = (vec1, vec2) => vec1.map((val, i) => val * vec2[i]);
 export const vSub = (vec1, vec2) => vec1.map((val, i) => val - vec2[i]);
 
+export const range = (start, end, length = end - start) =>
+  Array.from({ length }, (_, i) => start + i);
+
 export const getRegexMatches = (regex, str) => {
   let m;
   const matches = [];

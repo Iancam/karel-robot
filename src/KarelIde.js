@@ -7,6 +7,10 @@ import { recorderDecorator } from './recorderDecorator';
 import { javascriptify, pythonGlobals } from './pythonTranslator';
 import { addLineIndexMiddleware, addLineNumbers } from './addLineNumbers';
 import { sidebar } from './sidebar';
+import { worldsView } from './worldsView';
+import { worlds } from './worlds';
+import { keyBy } from 'lodash-es';
+
 export class KarelIde extends LitElement {
   static get properties() {
     return {
@@ -17,6 +21,7 @@ export class KarelIde extends LitElement {
       stateIndex: { type: Number },
       files: { type: Array },
       sidebarExpanded: { type: Boolean },
+      world: { type: String },
       // beforeRun: { type: Function },
     };
   }
@@ -29,26 +34,33 @@ export class KarelIde extends LitElement {
     return this.editor.listFiles();
   }
 
+  async updateLanguage(e) {
+    this.language = e.target.value;
+    this.editor.setLanguage(this.language);
+  }
   languages = [
     { index: 0, value: 'python', text: 'Python' },
     { index: 1, value: 'javascript', text: 'JavaScript' },
   ];
   language = 'python';
 
-  starterWorld() {
-    return {
-      karel: { cell: [0, 0], direction: 'e' },
-      dimensions: [10, 10],
-      beepers: [],
-    };
+  worlds = keyBy(worlds, 'name');
+
+  updateWorld(world) {
+    this.world = world;
+    this.requestUpdate();
+    console.log(this.world);
+    this.handleResize();
   }
+  world = '10x10';
+
   async runCode() {
     const code = (await this.editor).getCode();
     const languageMap = { python: javascriptify, javascript: code => code };
     const transpiledCode = languageMap[this.language](code);
     const lineNumberCode = addLineNumbers(transpiledCode);
     const { getDiffs, getStates, engine } = recorderDecorator(
-      karelModel(this.starterWorld()),
+      karelModel(this.worlds[this.world].world),
       { ignoreUndefined: true, max: 2500 }
     );
     const karel = karelInterface(engine, {
@@ -109,7 +121,10 @@ export class KarelIde extends LitElement {
       canvas.width = width;
       canvas.height = height;
     }
-    draw(this.canvas, (this.states && this.states[0]) || this.starterWorld());
+    draw(
+      this.canvas,
+      (this.states && this.states[0]) || this.worlds[this.world].world
+    );
   }
 
   onSave(e) {
@@ -141,11 +156,6 @@ export class KarelIde extends LitElement {
     this.handleResize();
   }
 
-  async updateLanguage(e) {
-    this.language = e.target.value;
-    this.editor.setLanguage(this.language);
-  }
-
   render() {
     return html`
       <div class=${this.class}>
@@ -162,6 +172,7 @@ export class KarelIde extends LitElement {
             ${this.languages.map(
               ({ value, text }) =>
                 html`<option
+                  @click=${() => console.log(value)}
                   ?selected=${this.languageId === value}
                   value=${value}
                 >
@@ -178,6 +189,7 @@ export class KarelIde extends LitElement {
             Run
           </button>
           <button class="" @click=${this.reset}>Reset</button>
+          ${worldsView(worlds, this.updateWorld.bind(this), this.world)}
         </div>
         <canvas
           id="canvas"
