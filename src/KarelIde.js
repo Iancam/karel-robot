@@ -26,12 +26,23 @@ export class KarelIde extends LitElement {
     };
   }
   sidebarExpanded = true;
-  get canvas() {
-    return this.shadowRoot.querySelector('#canvas');
-  }
 
   get files() {
     return this.editor.listFiles();
+  }
+  onSave(e) {
+    const modifier = window.navigator.platform.match('Mac')
+      ? e.metaKey
+      : e.ctrlKey;
+    if (e.key === 's' && modifier) {
+      this.editor.save(window.prompt('What shall we call your file?'), {
+        language: this.language,
+        world: this.world,
+        date: new Date(),
+      });
+      this.requestUpdate();
+      e.preventDefault();
+    }
   }
 
   async updateLanguage(e) {
@@ -50,6 +61,7 @@ export class KarelIde extends LitElement {
     this.world = world;
     this.requestUpdate();
     console.log(this.world);
+    this.reset();
     this.handleResize();
   }
   world = '10x10';
@@ -70,6 +82,7 @@ export class KarelIde extends LitElement {
     this.states = getStates();
     this.diffs = getDiffs();
   }
+
   animateDiffs() {
     this.index = 0;
     const intervalID = setInterval(async () => {
@@ -93,6 +106,7 @@ export class KarelIde extends LitElement {
 
   async reset() {
     this.updateState(0);
+    this.states = this.diffs = undefined;
   }
 
   static get styles() {
@@ -109,6 +123,9 @@ export class KarelIde extends LitElement {
       `,
     ];
   }
+  get canvas() {
+    return this.shadowRoot.querySelector('#canvas');
+  }
 
   // allows canvas sizing to be determined by css
   handleResize() {
@@ -121,25 +138,11 @@ export class KarelIde extends LitElement {
       canvas.width = width;
       canvas.height = height;
     }
+    console.log(this.states, this.world);
     draw(
       this.canvas,
-      (this.states && this.states[0]) || this.worlds[this.world].world
+      this.states?.[this.stateIndex] || this.worlds[this.world].world
     );
-  }
-
-  onSave(e) {
-    const modifier = window.navigator.platform.match('Mac')
-      ? e.metaKey
-      : e.ctrlKey;
-    if (e.key === 's' && modifier) {
-      this.editor.save(window.prompt('What shall we call your file?'), {
-        language: this.language,
-        world: this.world,
-        date: new Date(),
-      });
-      this.requestUpdate();
-      e.preventDefault();
-    }
   }
   connectedCallback() {
     super.connectedCallback();
