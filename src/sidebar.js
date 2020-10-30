@@ -11,7 +11,7 @@ export function sidebar(
   return html`
     <div class="">
       <div
-        class="vh-100 v overflow-scroll bg-black-05 fixed top-0 right-0 ${expanded
+        class="vh-100 v overflow-scroll ba b-black bg-near-white fixed top-0 right-0 ${expanded
           ? 'w-25'
           : 'w2'}"
       >

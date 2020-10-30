@@ -22,6 +22,7 @@ export class KarelIde extends LitElement {
       files: { type: Array },
       sidebarExpanded: { type: Boolean },
       world: { type: String },
+      speed: { type: String },
       // beforeRun: { type: Function },
     };
   }
@@ -83,13 +84,14 @@ export class KarelIde extends LitElement {
     this.diffs = getDiffs();
   }
 
+  speed = 500;
   animateDiffs() {
     this.index = 0;
     const intervalID = setInterval(async () => {
       if (!(await this.updateState(this.index++))) {
         return clearInterval(intervalID);
       }
-    }, 500);
+    }, this.speed);
   }
 
   updateState(value) {
@@ -138,7 +140,6 @@ export class KarelIde extends LitElement {
       canvas.width = width;
       canvas.height = height;
     }
-    console.log(this.states, this.world);
     draw(
       this.canvas,
       this.states?.[this.stateIndex] || this.worlds[this.world].world
@@ -161,16 +162,21 @@ export class KarelIde extends LitElement {
 
   render() {
     return html`
-      <div class=${this.class}>
+      <div class=${this.class /*+ (this.sidebarExpanded ? ' mr-25' : ' mr2')*/}>
         <div class="vh-10 overflow-hidden">
           <input
+            class=""
             type="range"
             min="0"
-            value=${this.stateIndex}
-            max=${this.states ? this.states.length - 1 : 0}
+            value=${this.speed}
+            max=${500}
             step="1"
-            @input=${e => this.updateState(e.target.value)}
+            @input=${e => {
+              console.log(500 - e.target.value);
+              this.speed = 500 - e.target.value;
+            }}
           />
+
           <select name="language" @change=${this.updateLanguage}>
             ${this.languages.map(
               ({ value, text }) =>
@@ -194,29 +200,35 @@ export class KarelIde extends LitElement {
           <button class="" @click=${this.reset}>Reset</button>
           ${worldsView(worlds, this.updateWorld.bind(this), this.world)}
         </div>
-        <canvas
-          id="canvas"
-          class="square fr ${this.sidebarExpanded ? 'mr-25' : 'mr2'}"
-        ></canvas>
-        ${sidebar(
-          this.files.map(fileName => this.editor.load(fileName)),
-          this.sidebarExpanded,
-          () => {
-            this.sidebarExpanded = !this.sidebarExpanded;
-            this.requestUpdate();
-          },
-          fname => {
-            this.editor.setCode(this.editor.load(fname).code);
-            alert('loaded!');
-          },
-          fname => {
-            console.log('goodbye', fname);
-
-            this.editor.remove(fname);
-            this.requestUpdate();
-          }
-        )}
+        <canvas id="canvas" class="square"></canvas>
+        <input
+          class="db w-100 gold"
+          type="range"
+          min="0"
+          value=${this.stateIndex}
+          max=${this.states ? this.states.length - 1 : 0}
+          step="1"
+          @input=${e => this.updateState(e.target.value)}
+        />
       </div>
+      ${sidebar(
+        this.files.map(fileName => this.editor.load(fileName)),
+        this.sidebarExpanded,
+        () => {
+          this.sidebarExpanded = !this.sidebarExpanded;
+          this.requestUpdate();
+        },
+        fname => {
+          this.editor.setCode(this.editor.load(fname).code);
+          alert('loaded!');
+        },
+        fname => {
+          console.log('goodbye', fname);
+
+          this.editor.remove(fname);
+          this.requestUpdate();
+        }
+      )}
     `;
   }
 }
