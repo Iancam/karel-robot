@@ -11,19 +11,6 @@ function indents(line) {
   return count;
 }
 
-export function linesBinSearch({ charIndex }, stack) {
-  const mid = Math.floor(stack.length / 2);
-  const { charIndex: charIndex2 } = stack[mid];
-  const top = stack[mid + 1];
-  const charIndexTop = top ? top.charIndex : Number.MAX_VALUE;
-  if (charIndex < charIndexTop && charIndex > charIndex2) {
-    return stack[mid];
-  }
-  if (charIndex > charIndexTop) {
-    return linesBinSearch({ charIndex }, stack.slice(mid));
-  } else return linesBinSearch({ charIndex }, stack.slice(undefined, mid));
-}
-
 function addBracketsFactory() {
   let indentStack = [0];
   return ({ indentLevel, transform }) => {
@@ -58,6 +45,7 @@ export function javascriptify(input) {
         return `${key}(${body})`;
       })
       .replace('else:', 'else')
+      .replace('elif', 'else if')
       .replace(' and ', ' && ')
       .replace(' or ', ' || ')
       .replace(' not ', ' ! ')
