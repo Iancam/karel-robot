@@ -26,22 +26,25 @@ import { cloneDeep } from 'lodash-es';
  *    cell:coord,
  *    direction: dir}
  *  }} karelState
- *  @typedef {(diff:diff)=> {karelState:karelState, checkCell, beepersAt}} karelEngine
+ *  @typedef {(diff:diff)=>{karel:karelState, validateCell: (coord: coord)=>{value:boolean, msg:string}, beepersAt}} karelEngine
  */
 
 /**
  *
  * @param {karelState}
  * @param {coord}
+ * @returns {{value:boolean, msg: string?}} validation
  */
-const validSquare = ({ dimensions: [xDim, yDim], walls }) => ([cx, cy]) => {
+const validCell = ({ dimensions: [xDim, yDim], walls }) => ([cx, cy]) => {
   if (walls)
     for (let [wx, wy] of walls) {
-      if (wx === cx && wy == cy) throw 'karel cannot walk through walls';
+      if (wx === cx && wy == cy)
+        return { value: false, msg: 'karel cannot walk through walls' };
     }
   if (cx >= xDim || cx < 0 || cy >= yDim || cy < 0)
-    throw 'karel cannot breath in space';
-  return true;
+    return { value: false, msg: 'karel cannot breath in space' };
+
+  return { value: true };
 };
 
 /**
@@ -93,7 +96,7 @@ const beepers = ({ beepers }) => {
  *
  * @param {{karel:karel}}
  */
-const karel = ({ karel }, validateSquare) => {
+const karel = ({ karel }, validateCell) => {
   let karelState = cloneDeep(karel);
   karelState.direction = directionTransforms(karelState.direction).index;
   /**
@@ -105,7 +108,10 @@ const karel = ({ karel }, validateSquare) => {
 
     if (move) {
       const newCell = vAdd(karelState.cell, move);
-      validateSquare(newCell) && (karelState.cell = newCell);
+      const validation = validateCell(newCell);
+      console.log(validation);
+      if (validation.value) karelState.cell = newCell;
+      else throw validation.msg;
     }
     return karelState;
   };
@@ -117,11 +123,11 @@ const karel = ({ karel }, validateSquare) => {
  *  @param {karelState} initialState
  */
 export default initialState => {
-  const checkCell = validSquare(initialState);
+  const validateCell = validCell(initialState);
   const { diffHandler: changeBeepers, checkCell: beepersAt } = beepers(
     initialState
   );
-  const changeKarel = karel(initialState, checkCell);
+  const changeKarel = karel(initialState, validateCell);
   /**
    
    * @param {diff} diff
@@ -132,7 +138,7 @@ export default initialState => {
     const karel = changeKarel(diff || {});
     return {
       ...initialState,
-      checkCell,
+      validateCell,
       beepersAt,
       beepers: changeBeepers(diff || {}),
       karel,
