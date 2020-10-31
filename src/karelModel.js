@@ -109,7 +109,6 @@ const karel = ({ karel }, validateCell) => {
     if (move) {
       const newCell = vAdd(karelState.cell, move);
       const validation = validateCell(newCell);
-      console.log(validation);
       if (validation.value) karelState.cell = newCell;
       else throw validation.msg;
     }
