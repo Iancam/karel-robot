@@ -64,18 +64,18 @@ export async function addEditor(id, options) {
         monaco.languages.registerCompletionItemProvider('java', options);
       }
       var editor = monaco.editor.create(document.getElementById(id), {
-        value: options.code,
-        language: options.language,
+        // value: options.code,
+        // language: options.language,
         automaticLayout: true,
         noLib: true,
       });
 
-      if (options.saveEdits) {
-        const model = editor.getModel();
-        model.onDidChangeContent(() => {
-          localStorage.setItem(window.location.href, model.getValue());
-        });
-      }
+      // if (options.saveEdits) {
+      //   const model = editor.getModel();
+      //   model.onDidChangeContent(() => {
+      //     localStorage.setItem(window.location.href, model.getValue());
+      //   });
+      // }
       res(editor);
     });
   });

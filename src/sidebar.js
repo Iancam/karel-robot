@@ -6,8 +6,10 @@ export function sidebar(
   expanded,
   expandClicked,
   fileClicked,
-  removeClicked
+  removeClicked,
+  currentFileName
 ) {
+  console.log(currentFileName);
   return html`
     <div class="">
       <div
@@ -23,13 +25,14 @@ export function sidebar(
         ></div>
 
         ${expanded
-          ? files.map(({ name, language, world, date }) => {
+          ? files?.map(({ name, language, world, date }) => {
               return html` <div
                   @click=${() => removeClicked(name)}
                   class="hover-bg-black bg-animate pointer fr mt0 bg-dark-red w2 h2 bt br"
                 ></div>
+
                 <div
-                  class="ba b--black bg-black-10 pa3 link avenir hover-orange pointer"
+                  class="ba b--black bg-black-10 pa3 link avenir hover-orange pointer "
                   @click=${() => fileClicked(name)}
                 >
                   <span class="f3 mt0">${name}</span>

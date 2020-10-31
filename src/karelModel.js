@@ -39,7 +39,7 @@ const validSquare = ({ dimensions: [xDim, yDim], walls }) => ([cx, cy]) => {
     for (let [wx, wy] of walls) {
       if (wx === cx && wy == cy) throw 'karel cannot walk through walls';
     }
-  if (cx > xDim || cx < 0 || cy > yDim || cy < 0)
+  if (cx >= xDim || cx < 0 || cy >= yDim || cy < 0)
     throw 'karel cannot breath in space';
   return true;
 };
@@ -69,7 +69,7 @@ const beepers = ({ beepers }) => {
   function checkCell(cell) {
     const [x, y] = cell;
     const beeper = beeperLookup[x] && beeperLookup[x][y];
-    return { cell, count: beeper.count || 0 };
+    return { cell, count: beeper?.count || 0 };
   }
 
   /**

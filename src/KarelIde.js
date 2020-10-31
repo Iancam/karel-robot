@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit-element';
-import tachyons from '../css/tachyons.min.css';
+import tachyons from './tachyons.min.css';
 import karelInterface from './karelInterface';
 import karelModel from './karelModel';
 import draw from './karelView';
@@ -26,10 +26,10 @@ export class KarelIde extends LitElement {
       // beforeRun: { type: Function },
     };
   }
-  sidebarExpanded = true;
+  sidebarExpanded = false;
 
   get files() {
-    return this.editor.listFiles();
+    return this.editor?.listFiles();
   }
   onSave(e) {
     const modifier = window.navigator.platform.match('Mac')
@@ -47,30 +47,32 @@ export class KarelIde extends LitElement {
   }
 
   async updateLanguage(e) {
-    this.language = e.target.value;
-    this.editor.setLanguage(this.language);
+    this.editor.setLanguage(e.target.value);
   }
   languages = [
     { index: 0, value: 'python', text: 'Python' },
     { index: 1, value: 'javascript', text: 'JavaScript' },
   ];
-  language = 'python';
+
+  get language() {
+    return this.editor?.language();
+  }
 
   worlds = keyBy(worlds, 'name');
 
   updateWorld(world) {
     this.world = world;
     this.requestUpdate();
-    console.log(this.world);
     this.reset();
     this.handleResize();
   }
   world = '10x10';
 
   async runCode() {
-    const code = (await this.editor).getCode();
+    const code = this.editor.getCode();
     const languageMap = { python: javascriptify, javascript: code => code };
     const transpiledCode = languageMap[this.language](code);
+
     const lineNumberCode = addLineNumbers(transpiledCode);
     const { getDiffs, getStates, engine } = recorderDecorator(
       karelModel(this.worlds[this.world].world),
@@ -172,7 +174,6 @@ export class KarelIde extends LitElement {
             max=${500}
             step="1"
             @input=${e => {
-              console.log(500 - e.target.value);
               this.speed = 500 - e.target.value;
             }}
           />
@@ -181,8 +182,7 @@ export class KarelIde extends LitElement {
             ${this.languages.map(
               ({ value, text }) =>
                 html`<option
-                  @click=${() => console.log(value)}
-                  ?selected=${this.languageId === value}
+                  ?selected=${this.language === value}
                   value=${value}
                 >
                   ${text}
@@ -212,7 +212,7 @@ export class KarelIde extends LitElement {
         />
       </div>
       ${sidebar(
-        this.files.map(fileName => this.editor.load(fileName)),
+        this.files?.map(fileName => this.editor.load(fileName)),
         this.sidebarExpanded,
         () => {
           this.sidebarExpanded = !this.sidebarExpanded;
@@ -224,10 +224,10 @@ export class KarelIde extends LitElement {
         },
         fname => {
           console.log('goodbye', fname);
-
           this.editor.remove(fname);
           this.requestUpdate();
-        }
+        },
+        this.editor?.currentFile()
       )}
     `;
   }

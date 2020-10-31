@@ -1,5 +1,5 @@
 // because this function uses a 'with' statement,
-// this code cannot be imported in the usual way,
+// it cannot be imported in the usual way,
 // and has to come from global scope
 /**
  *
@@ -7,7 +7,12 @@
  * @param {import('./karelModel').karelState} initialWorld
  */
 function _runCode(code, karelInterface, globals) {
-  with ({ ...karelInterface, ...globals, code }) {
-    eval(code + '\nmain()');
+  try {
+    with ({ ...karelInterface, ...globals, code }) {
+      eval(code + '\nmain()');
+    }
+  } catch (error) {
+    console.log(error);
+    alert(error);
   }
 }

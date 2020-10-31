@@ -7,6 +7,7 @@ function indents(line) {
     if (char === ' ' || char === '\t') count++;
     else break;
   }
+
   return count;
 }
 
@@ -26,10 +27,15 @@ export function linesBinSearch({ charIndex }, stack) {
 function addBracketsFactory() {
   let indentStack = [0];
   return ({ indentLevel, transform }) => {
-    if (indentLevel > last(indentStack)) {
+    // ignore commented lines
+    if (transform.includes('#') && !transform.split('#')[0].trim().length)
+      return transform;
+    // ignore whitespace in empty lines
+    if (indentLevel > last(indentStack) && transform.trim().length) {
       indentStack.push(indentLevel);
       transform = '{' + transform;
     }
+
     while (indentLevel < last(indentStack)) {
       indentStack.pop();
       transform = '}' + transform;
@@ -41,7 +47,7 @@ function addBracketsFactory() {
 export function javascriptify(input) {
   const addBrackets = addBracketsFactory();
 
-  const lines = input.split('\n').reduce((lines, line, i) => {
+  const lines = [...input.split('\n'), ''].reduce((lines, line, i) => {
     const prevLine = last(lines);
     const indentLevel = indents(line);
 
@@ -51,10 +57,12 @@ export function javascriptify(input) {
       .replace(/(if|for|while|def) (.*):/, (__, key, body) => {
         return `${key}(${body})`;
       })
+      .replace('else:', 'else')
       .replace(' and ', ' && ')
       .replace(' or ', ' || ')
       .replace(' not ', ' ! ')
       .replace(' in ', ' of ')
+      .replace('#', '//')
       .replace(/\bpass\b/, '');
 
     lines.push({
@@ -67,7 +75,9 @@ export function javascriptify(input) {
     return lines;
   }, []);
 
-  return lines.map(({ transform }) => transform).join('\n');
+  const final = lines.map(({ transform }) => transform).join('\n');
+  console.log(final);
+  return final;
 }
 
 export const pythonGlobals = {

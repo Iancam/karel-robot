@@ -1,6 +1,6 @@
 import directionTranslator, { directions } from './directionUtils';
 import { capitalize, toObject } from './utils';
-import { flowRight, flow } from 'lodash-es';
+import { flowRight, flow, entries } from 'lodash-es';
 export const Karel = {
   instructions: {
     move: 1,
@@ -22,6 +22,11 @@ export const Karel = {
   },
 };
 
+function negateInterface(iface) {
+  return Object.entries(iface)
+    .map(([k, fx]) => ['not' + k[0].toUpperCase() + k.slice(1), () => !fx()])
+    .reduce(toObject, {});
+}
 /**
  * @param {import('./karelModel').karelEngine} karelEngine
  *
@@ -59,6 +64,8 @@ export default function karelInterface(karelEngine, options = {}) {
     ])
     .reduce(toObject, {});
 
+  const notClearInterface = negateInterface(clearInterface);
+
   const facingInterface = directions
     .map(({ name }, i) => [
       'facing' + capitalize(name),
@@ -69,9 +76,12 @@ export default function karelInterface(karelEngine, options = {}) {
     ])
     .reduce(toObject, {});
 
+  const notFacingInterface = negateInterface(facingInterface);
+
   const karelInterface = {
     ...clearInterface,
     ...facingInterface,
+    ...notFacingInterface,
     ...turnsInterface,
     move: () => {
       const { direction } = karelEngine().karel;
@@ -88,7 +98,12 @@ export default function karelInterface(karelEngine, options = {}) {
       return [{ beeper: { cell: karelEngine().karel.cell, count: -1 } }];
     },
     beepersPresent: () => {
-      return [{ beepersPresent: karel.cell }, beepersAt(karel.cell).count];
+      const cell = karelEngine().karel.cell;
+      return [{ beepersPresent: cell }, karelEngine().beepersAt(cell).count];
+    },
+    noBeepersPresent: () => {
+      const cell = karelEngine().karel.cell;
+      return [{ noBeepersPresent: cell }, !karelEngine().beepersAt(cell).count];
     },
   };
 
