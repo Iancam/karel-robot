@@ -1,5 +1,5 @@
 import directionTranslator, { directions } from './directionUtils';
-import { capitalize, toObject } from './utils';
+import { capitalize, toObject, vAdd } from './utils';
 import { flowRight, flow, entries } from 'lodash-es';
 export const Karel = {
   instructions: {
@@ -22,11 +22,19 @@ export const Karel = {
   },
 };
 
-function negateInterface(iface) {
+function negateInterface(iface, nameHandler = k => 'not' + capitalize(k)) {
   return Object.entries(iface)
-    .map(([k, fx]) => ['not' + k[0].toUpperCase() + k.slice(1), () => !fx()])
+    .map(([k, fx]) => [nameHandler(k), () => !fx()])
     .reduce(toObject, {});
 }
+
+/**
+ * @typedef {(args)=>([import('./karelModel').diff, any?])} karelInterfaceFunction
+ * @typedef {(karelInterfaceFunction)=>karelInterfaceFunction} karelInterfaceMiddleware
+ * @param {*} karelEngine
+ * @param {} options
+ */
+
 /**
  * @param {import('./karelModel').karelEngine} karelEngine
  *
@@ -51,20 +59,24 @@ export default function karelInterface(karelEngine, options = {}) {
       (key === 'around' ? 'back' : key) + 'IsClear',
       () => {
         const funcName = (key === 'around' ? 'back' : key) + 'IsClear';
-        const { checkCell, karel } = karelEngine();
-        const adjunctCell = directionTranslator(karel.direction + turns[key])
-          .move;
+        const { validateCell, karel } = karelEngine();
+        const adjunctCell = vAdd(
+          directionTranslator(karel.direction + turns[key]).move,
+          karel.cell
+        );
         return [
           {
             [funcName]: adjunctCell,
           },
-          checkCell(adjunctCell),
+          validateCell(adjunctCell).value,
         ];
       },
     ])
     .reduce(toObject, {});
 
-  const notClearInterface = negateInterface(clearInterface);
+  const blockedInterface = negateInterface(clearInterface, k => {
+    return k.slice(undefined, k.length - 5) + 'Blocked';
+  });
 
   const facingInterface = directions
     .map(({ name }, i) => [
@@ -80,6 +92,7 @@ export default function karelInterface(karelEngine, options = {}) {
 
   const karelInterface = {
     ...clearInterface,
+    ...blockedInterface,
     ...facingInterface,
     ...notFacingInterface,
     ...turnsInterface,
