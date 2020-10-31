@@ -34,7 +34,6 @@ function createKarelProposals(language, range) {
 }
 
 export async function addEditor(id, options) {
-  require.config({ paths: { vs: './node_modules/monaco-editor/min/vs' } });
   return new Promise((res, rej) => {
     require(['vs/editor/editor.main'], function () {
       if (!window._editor) {

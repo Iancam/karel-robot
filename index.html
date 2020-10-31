@@ -13,6 +13,32 @@
       integrity="sha256-0SGl1PJNDyJwcV5T+weg2zpEMrh7xvlwO4oXgvZCeZk="
       crossorigin="anonymous"
     ></script>
+    <script>
+      // because this function uses a 'with' statement,
+      // it cannot be imported in the usual way,
+      // and has to come from global scope
+      /**
+       *
+       * @param {string} code
+       * @param {import('./karelModel').karelState} initialWorld
+       */
+      function _runCode(code, karelInterface, globals) {
+        try {
+          with ({ ...karelInterface, ...globals, code }) {
+            eval(code + '\nmain()');
+          }
+        } catch (error) {
+          console.log(error);
+          alert(error);
+        }
+      }
+    </script>
+    <style>
+      .square {
+        width: min(45vw, 90vh);
+        height: min(45vw, 90vh);
+      }
+    </style>
     <link
       rel="stylesheet"
       data-name="vs/editor/editor.main"
@@ -42,8 +68,10 @@
       );
     </script>
     <script type="module" src="./src/editor.js"></script>
-    <link rel="stylesheet" href="./css/tachyons.css" />
-    <link rel="stylesheet" href="./css/utils.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"
+    />
     <title>karel-ide</title>
   </head>
   <body>
