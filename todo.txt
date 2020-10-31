@@ -18,3 +18,7 @@ create a remote session
 join a remote session
   enter 6 digit key
     pusher connect to events on 6digit channel
+
+set javascript as default language if none found
+front is clear not working
+make speed work all the time 
