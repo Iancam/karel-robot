@@ -33,7 +33,7 @@ function createKarelProposals(language, range) {
   return [...instructions, ...predicates];
 }
 
-export async function addEditor(id, options) {
+export async function addEditor(id) {
   return new Promise((res, rej) => {
     require(['vs/editor/editor.main'], function () {
       if (!window._editor) {
