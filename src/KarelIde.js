@@ -89,11 +89,19 @@ export class KarelIde extends LitElement {
   speed = 500;
   animateDiffs() {
     this.index = 0;
-    const intervalID = setInterval(async () => {
-      if (!(await this.updateState(this.index++))) {
-        return clearInterval(intervalID);
+    let last;
+    this.animating = true;
+    const animator = ts => {
+      if (last === undefined) last = ts;
+      const timeDiff = ts - last;
+      if (timeDiff > this.speed && this.animating) {
+        if (!this.updateState(this.index++)) return (this.animating = false);
+        last = ts;
       }
-    }, this.speed);
+      requestAnimationFrame(animator);
+    };
+    console.log('called');
+    requestAnimationFrame(animator);
   }
 
   updateState(value) {
