@@ -11,7 +11,6 @@ export async function EditorModel(monacoEditor, options) {
     setLanguage: function (lang) {
       let model = editor.getModel();
       language = lang;
-      console.log(lang);
       monaco.editor.setModelLanguage(model, lang);
       this.updateSession();
     },
@@ -76,7 +75,6 @@ export async function EditorModel(monacoEditor, options) {
         language,
       };
       this.setCode(code || starterCode);
-      console.log(lang);
       this.setLanguage(lang);
     },
 
