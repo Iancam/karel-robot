@@ -1,6 +1,6 @@
 import directionTranslator, { directions } from './directionUtils';
 import { capitalize, toObject, vAdd } from './utils';
-import { flowRight, flow, entries } from 'lodash-es';
+import { flow } from 'lodash-es';
 export const Karel = {
   instructions: {
     move: 1,
@@ -21,10 +21,18 @@ export const Karel = {
     facingWest: 1,
   },
 };
-
+/**
+ *
+ * @param {{string:karelInterfaceFunction}} iface
+ * @param {*} nameHandler
+ */
 function negateInterface(iface, nameHandler = k => 'not' + capitalize(k)) {
   return Object.entries(iface)
-    .map(([k, fx]) => [nameHandler(k), () => !fx()])
+    .map(([k, fx]) => {
+      const newName = nameHandler(k);
+      const [diff, value] = fx();
+      return [newName, () => [{ [newName]: diff[k] }, !value]];
+    })
     .reduce(toObject, {});
 }
 
