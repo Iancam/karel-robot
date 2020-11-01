@@ -9,7 +9,6 @@ export function sidebar(
   removeClicked,
   currentFileName
 ) {
-  console.log(currentFileName);
   return html`
     <div class="">
       <div

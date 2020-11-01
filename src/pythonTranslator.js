@@ -64,7 +64,6 @@ export function javascriptify(input) {
   }, []);
 
   const final = lines.map(({ transform }) => transform).join('\n');
-  console.log(final);
   return final;
 }
 
