@@ -100,7 +100,6 @@ export class KarelIde extends LitElement {
       }
       requestAnimationFrame(animator);
     };
-    console.log('called');
     requestAnimationFrame(animator);
   }
 
@@ -216,7 +215,10 @@ export class KarelIde extends LitElement {
           value=${this.stateIndex}
           max=${this.states ? this.states.length - 1 : 0}
           step="1"
-          @input=${e => this.updateState(e.target.value)}
+          @input=${e => {
+            this.animating = false;
+            return this.updateState(e.target.value);
+          }}
         />
       </div>
       ${sidebar(
