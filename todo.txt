@@ -20,5 +20,7 @@ join a remote session
     pusher connect to events on 6digit channel
 
 set javascript as default language if none found
-front is clear not working
-make speed work all the time 
+front is clear not working √
+make speed work all the time √
+using scroll should cancel animation √
+improve saving

@@ -39,7 +39,6 @@ export class KarelIde extends LitElement {
     const modifier = window.navigator.platform.match('Mac')
       ? e.metaKey
       : e.ctrlKey;
-    console.log(e);
     if (e.key === 's' && modifier) {
       e.preventDefault();
       this.sidebarExpanded = true;
@@ -69,11 +68,11 @@ export class KarelIde extends LitElement {
       this.sidebarExpanded = false;
       this.newFile = false;
       this.toast('We saved your file: ' + filename + '!');
-
       this.requestUpdate();
     } else if (e.key === 'Escape') {
       this.sidebarExpanded = false;
       this.newFile = false;
+      this.requestUpdate();
     }
   }
 
@@ -337,7 +336,7 @@ export class KarelIde extends LitElement {
         />
       </div>
       ${sidebar(
-        [...this.files].map(fileName => this.editor.load(fileName)),
+        this.files?.map(fileName => this.editor.load(fileName)),
         this.sidebarExpanded,
         () => {
           this.sidebarExpanded = !this.sidebarExpanded;
