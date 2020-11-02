@@ -12,11 +12,11 @@ See her in action [here](karel-robot.vercel.app)!
 
 ![speedy Karel](https://media.giphy.com/media/dVp6UypbZJBwt93z13/giphy.gif)
 
-all while showing you the current executing line.
+- and save your files too (with cmd + s on mac and ctrl + s on windows).
 
 ![savingkarel](https://media.giphy.com/media/7lvj6p37idO3noymGy/giphy.gif)
 
-- and save your files too (with cmd + s on mac and ctrl + s on windows).
+all while showing you the current executing line.
 
 # Acknowledgments
 
