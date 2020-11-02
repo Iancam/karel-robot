@@ -31,23 +31,67 @@ export class KarelIde extends LitElement {
   get files() {
     return this.editor?.listFiles();
   }
+  get saveFileNameElement() {
+    return this.shadowRoot.querySelector('#saveFileName');
+  }
+
   onSave(e) {
     const modifier = window.navigator.platform.match('Mac')
       ? e.metaKey
       : e.ctrlKey;
+    console.log(e);
     if (e.key === 's' && modifier) {
-      this.editor.save(window.prompt('What shall we call your file?'), {
-        language: this.language,
-        world: this.world,
-        date: new Date(),
-      });
-      this.requestUpdate();
       e.preventDefault();
+      this.sidebarExpanded = true;
+      this.newFile = true;
+      setTimeout(() => {
+        this.whileSaving();
+      }, 40);
+
+      this.requestUpdate();
+    }
+  }
+  saveCommitted(e) {
+    if (e.key == 'Enter') {
+      e.preventDefault();
+      const filename = this.saveFileNameElement.textContent;
+      this.editor.save(filename, {
+        language: this.language,
+        date: new Date(),
+        world: this.world,
+      });
+      window.removeEventListener(
+        'keydown',
+        this.saveCommitted.bind(this),
+        false
+      );
+      this.saveFileNameElement.blur();
+      this.sidebarExpanded = false;
+      this.newFile = false;
+      this.toast('We saved your file: ' + filename + '!');
+
+      this.requestUpdate();
+    } else if (e.key === 'Escape') {
+      this.sidebarExpanded = false;
+      this.newFile = false;
     }
   }
 
-  async updateLanguage(e) {
-    this.editor.setLanguage(e.target.value);
+  whileSaving() {
+    this.saveFileNameElement.focus();
+
+    window.addEventListener('keydown', this.saveCommitted.bind(this), false);
+  }
+  toast(msg) {
+    this.toastmsg = msg;
+    const closeToast = () => {
+      this.toastmsg = undefined;
+      this.requestUpdate();
+    };
+    setTimeout(closeToast, 3000);
+  }
+  async updateLanguage(value) {
+    this.editor.setLanguage(value);
   }
   languages = [
     { index: 0, value: 'python', text: 'Python' },
@@ -62,9 +106,7 @@ export class KarelIde extends LitElement {
 
   updateWorld(world) {
     this.world = world;
-    this.requestUpdate();
     this.reset();
-    this.handleResize();
   }
   world = '10x10';
 
@@ -131,6 +173,67 @@ export class KarelIde extends LitElement {
         .mr-25 {
           margin-right: 25vw;
         }
+        .left-50 {
+          left: 50%;
+        }
+        .left-neg-50 {
+          left: -50%;
+        }
+        .top-10 {
+          top: 10vh;
+        }
+        .show {
+          visibility: visible; /* Show the snackbar */
+          /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+  However, delay the fade out process for 2.5 seconds */
+          -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+          animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        /* Animations to fade the snackbar in and out */
+        @-webkit-keyframes fadein {
+          from {
+            bottom: 0;
+            opacity: 0;
+          }
+          to {
+            bottom: 30px;
+            opacity: 1;
+          }
+        }
+
+        @keyframes fadein {
+          from {
+            bottom: 0;
+            opacity: 0;
+          }
+          to {
+            bottom: 30px;
+            opacity: 1;
+          }
+        }
+
+        @-webkit-keyframes fadeout {
+          from {
+            bottom: 30px;
+            opacity: 1;
+          }
+          to {
+            bottom: 0;
+            opacity: 0;
+          }
+        }
+
+        @keyframes fadeout {
+          from {
+            bottom: 30px;
+            opacity: 1;
+          }
+          to {
+            bottom: 0;
+            opacity: 0;
+          }
+        }
       `,
     ];
   }
@@ -161,7 +264,7 @@ export class KarelIde extends LitElement {
   }
   disconnectedCallback() {
     window.removeEventListener('resize', this.handleResize.bind(this));
-
+    window.removeventListener('keydown', this.onSave.bind(this), false);
     super.disconnectedCallback();
   }
 
@@ -170,7 +273,16 @@ export class KarelIde extends LitElement {
   }
 
   render() {
+    if (this.saving) {
+      this.whileSaving();
+    }
     return html`
+      <div class="absolute left-50 top-10 ${this.toastmsg ? 'show' : 'dn'}">
+        <div class="orange pa2 br3 ba b--gray avenir left-neg-50 relative">
+          ${this.toastmsg}
+        </div>
+      </div>
+
       <div class=${this.class /*+ (this.sidebarExpanded ? ' mr-25' : ' mr2')*/}>
         <div class="vh-10 overflow-hidden">
           <input
@@ -185,7 +297,10 @@ export class KarelIde extends LitElement {
             }}
           />
 
-          <select name="language" @change=${this.updateLanguage}>
+          <select
+            name="language"
+            @change=${e => this.updateLanguage(e.target.value)}
+          >
             ${this.languages.map(
               ({ value, text }) =>
                 html`<option
@@ -222,22 +337,32 @@ export class KarelIde extends LitElement {
         />
       </div>
       ${sidebar(
-        this.files?.map(fileName => this.editor.load(fileName)),
+        [...this.files].map(fileName => this.editor.load(fileName)),
         this.sidebarExpanded,
         () => {
           this.sidebarExpanded = !this.sidebarExpanded;
           this.requestUpdate();
         },
         fname => {
-          this.editor.setCode(this.editor.load(fname).code);
-          alert('loaded!');
+          const { language, world, code } = this.editor.load(fname);
+          this.editor.setCode(code);
+          this.updateLanguage(language);
+          this.updateWorld(world);
+          this.toast('tada!');
+          this.requestUpdate();
+          this.sidebarExpanded = false;
         },
         fname => {
+          this.toast(
+            'oh, goodbye then ' + (Math.random() > 0.5 ? 'mr.' : 'ms.' + fname)
+          );
           console.log('goodbye', fname);
           this.editor.remove(fname);
           this.requestUpdate();
         },
-        this.editor?.currentFile()
+        this.editor?.currentFile(),
+        this.language,
+        this.newFile
       )}
     `;
   }
