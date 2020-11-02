@@ -1,4 +1,4 @@
-# karel the robot
+# Karel the Robot
 
 See her in action [here](karel-robot.vercel.app)!
 
