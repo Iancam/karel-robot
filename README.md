@@ -4,9 +4,17 @@ See her in action [here](karel-robot.vercel.app)!
 
 # Features
 
-Karel can move back and forth in time
+- Karel can move back and forth in time
 
 ![timetravel](https://media.giphy.com/media/VesNQ8INZRVQ62yGuU/giphy.gif)
+
+- and change her speed
+
+![speedy Karel](https://media.giphy.com/media/dVp6UypbZJBwt93z13/giphy.gif)
+
+all while showing you the current executing line.
+
+She also saves your spot if you leave, and lets you save files too (with cmd + s on mac and ctrl + s on windows).
 
 # Acknowledgments
 
