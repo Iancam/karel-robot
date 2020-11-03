@@ -1,7 +1,7 @@
 export async function EditorModel(monacoEditor, options) {
   let editor = await monacoEditor;
   let openFile = undefined;
-  let language = undefined;
+  let language = 'javascript';
   let decorations = [];
   const starterCode = `function main(){
     // your code goes here!
@@ -24,7 +24,7 @@ export async function EditorModel(monacoEditor, options) {
     },
 
     setCode: function (code) {
-      return editor.getModel().setValue(code);
+      editor.getModel().setValue(code);
     },
 
     highlightLine: function (lineNumber, className) {
@@ -52,32 +52,36 @@ export async function EditorModel(monacoEditor, options) {
         text,
         forceMoveMarkers: true,
       };
-      return editor.executeEdits('my-source', [op]);
+      editor.executeEdits('my-source', [op]);
     },
-    updateSession() {
+
+    saveEdits: function () {
+      const model = editor.getModel();
+      model.onDidChangeContent(this.updateSession);
+    },
+
+    updateSession: function () {
       localStorage.setItem(
         'sessionCode',
         JSON.stringify({ code: this.getCode(), language })
       );
     },
-    saveEdits: function () {
-      const model = editor.getModel();
-      model.onDidChangeContent(() => {
-        this.updateSession();
-      });
-    },
 
     loadSession: function () {
       const { code, language: lang } = JSON.parse(
         localStorage.getItem('sessionCode')
-      ) || {
+      ) ?? {
         code: starterCode,
         language,
       };
-      this.setCode(code || starterCode);
+      this.setCode(code);
       this.setLanguage(lang);
     },
-
+    /**
+     *
+     * @param {string} fileName
+     * @param {{language, world, date}} options
+     */
     save: function (fileName, options) {
       const code = this.getCode();
       localStorage.setItem(
