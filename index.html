@@ -83,9 +83,17 @@
       let editor = addEditor('editor');
       let karel = document.querySelector('#karel');
       karel.interpret = _runCode;
-      EditorModel(editor).then(editor => (karel.editor = editor));
+      EditorModel(editor).then(
+        editor => (karel.editor = editor) && karel.requestUpdate()
+      );
     </script>
 
     <script type="module" src="./src/karel-ide.js"></script>
+    <div class="bottom-0 bg-light-yellow black-70 w-100 h2 dib pa2 avenir tc">
+      <div>
+        inpsired by
+        <a href="http://stanford.edu/~cpiech/karel/ide.html">Stanford Karel</a>
+      </div>
+    </div>
   </body>
 </html>
