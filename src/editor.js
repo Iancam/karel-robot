@@ -7,7 +7,7 @@ function createKarelProposals(language, range) {
       label: instruction,
       kind: monaco.languages.CompletionItemKind.Function,
       documententation: '',
-      insertText: instruction + '()' + (language === 'python' ? '' : ';'),
+      insertText: instruction + '()',
       range,
     };
   });
@@ -30,7 +30,7 @@ function createKarelProposals(language, range) {
     range,
   };
 
-  return [...instructions, ...predicates];
+  return [...instructions, ...predicates, ...controlFlow];
 }
 
 export async function addEditor(id) {
