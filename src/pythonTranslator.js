@@ -51,6 +51,8 @@ export function javascriptify(input) {
       .replace(' not ', ' ! ')
       .replace(' in ', ' of ')
       .replace('#', '//')
+      .replace('True', 'true')
+      .replace('False', 'false')
       .replace(/\bpass\b/, '');
 
     lines.push({
