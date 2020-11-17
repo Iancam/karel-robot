@@ -13,32 +13,44 @@ function indents(line) {
 
 function addBracketsFactory() {
   let indentStack = [0];
-  return ({ indentLevel, transform }) => {
-    // ignore commented lines
-    if (transform.includes('#') && !transform.split('#')[0].trim().length)
-      return transform;
+
+  return ({ indentLevel, transform, isTerminal }) => {
+    const dropStack = indentLevel => {
+      while (indentLevel < last(indentStack)) {
+        indentStack.pop();
+        transform = '}' + transform;
+      }
+    };
+
+    if (isTerminal) {
+      dropStack(0);
+    }
+    const isComment =
+      transform.includes('#') && !transform.split('#')[0].trim().length;
+    const isBlank = transform.length == 0;
+    if (isComment || isBlank) return transform;
     // ignore whitespace in empty lines
     if (indentLevel > last(indentStack) && transform.trim().length) {
       indentStack.push(indentLevel);
       transform = '{' + transform;
     }
-
-    while (indentLevel < last(indentStack)) {
-      indentStack.pop();
-      transform = '}' + transform;
-    }
+    dropStack(indentLevel);
     return transform;
   };
 }
 
 export function javascriptify(input) {
+  const rawLines = input.split('\n');
   const addBrackets = addBracketsFactory();
-
-  const lines = [...input.split('\n'), ''].reduce((lines, line, i) => {
+  const lines = rawLines.reduce((lines, line, i) => {
     const prevLine = last(lines);
     const indentLevel = indents(line);
 
-    const bracketed = addBrackets({ indentLevel, transform: line });
+    const bracketed = addBrackets({
+      indentLevel,
+      transform: line,
+      isTerminal: i == rawLines.length - 1,
+    });
     const transform = bracketed
       .replace(/def (.*):/, (__, body) => 'function ' + body)
       .replace(/(if|for|while|def) (.*):/, (__, key, body) => {
