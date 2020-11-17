@@ -57,7 +57,7 @@ export async function EditorModel(monacoEditor, options) {
 
     saveEdits: function () {
       const model = editor.getModel();
-      model.onDidChangeContent(this.updateSession);
+      model.onDidChangeContent(this.updateSession.bind(this));
     },
 
     updateSession: function () {
@@ -99,7 +99,7 @@ export async function EditorModel(monacoEditor, options) {
     listFiles: function () {
       return Object.keys(localStorage)
         .filter(k => k.startsWith('file::'))
-        .map(k => k.slice(6));
+        .map(k => JSON.parse(localStorage.getItem(k)));
     },
 
     remove: function (fname) {
