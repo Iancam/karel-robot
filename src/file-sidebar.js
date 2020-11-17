@@ -184,7 +184,6 @@ export class FileSidebar extends LitElement {
           ${this.sidebarExpanded
             ? this.editor
                 ?.listFiles()
-                .map(fileName => this.editor?.load(fileName))
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .map(f =>
                   file({
