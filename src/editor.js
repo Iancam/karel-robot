@@ -30,7 +30,7 @@ function createKarelProposals(language, range) {
     range,
   };
 
-  return [...instructions, ...predicates, ...controlFlow];
+  return [...instructions, ...predicates, controlFlow];
 }
 
 export async function addEditor(id) {
