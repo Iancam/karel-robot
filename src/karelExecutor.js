@@ -1,4 +1,4 @@
-import { addLineNumbers } from './addLineNumbers';
+import { addLineIndexMiddleware, addLineNumbers } from './addLineNumbers';
 import karelInterface from './karelInterface';
 import karelModel from './karelModel';
 import { javascriptify, pythonGlobals } from './pythonTranslator';
@@ -16,7 +16,7 @@ export function codeToStates(code, language, world, interpret) {
   const karel = karelInterface(engine, {
     middleware: [addLineIndexMiddleware],
   });
-  interpret(lineNumberCode, karel, pythonGlobals);
+  _runCode(lineNumberCode, karel, pythonGlobals);
 
   return { states: getStates(), diffs: getDiffs() };
 }
