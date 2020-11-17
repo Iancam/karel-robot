@@ -21,14 +21,11 @@ function addBracketsFactory() {
         transform = '}' + transform;
       }
     };
-
-    if (isTerminal) {
-      dropStack(0);
-    }
+    isTerminal && dropStack(0);
     const isComment =
       transform.includes('#') && !transform.split('#')[0].trim().length;
     const isBlank = transform.length == 0;
-    if (isComment || isBlank) return transform;
+    if (isComment || isBlank || isTerminal) return transform;
     // ignore whitespace in empty lines
     if (indentLevel > last(indentStack) && transform.trim().length) {
       indentStack.push(indentLevel);
