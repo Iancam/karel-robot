@@ -113,6 +113,10 @@ const draw = (canvas, karelState) => {
     ctx.fill();
     ctx.stroke();
     ctx.closePath();
+    ctx.font = '24px serif';
+    ctx.fillStyle = 'black';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
     ctx.fillText(count, ...center);
   }
 
