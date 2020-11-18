@@ -80,8 +80,8 @@ export class KarelIde extends LitElement {
       tachyons,
       css`
         .square {
-          width: min(50vw, 90vh);
-          height: min(50vw, 90vh);
+          width: min(50vw, 80vh);
+          height: min(50vw, 80vh);
         }
         .mr-25 {
           margin-right: 25vw;
@@ -132,6 +132,7 @@ export class KarelIde extends LitElement {
       <div class=${this.class /*+ (this.sidebarExpanded ? ' mr-25' : ' mr2')*/}>
         <div class="vh-10 overflow-hidden">
           <my-toaster msg=${this.toast ?? ''}></my-toaster>
+          <label htmlFor="">speed</label>
           <input
             class=""
             type="range"
@@ -155,20 +156,23 @@ export class KarelIde extends LitElement {
                 </option>`
             )}
           </select>
-          <button @click=${this.handleRun}>Run</button>
-          <button class="" @click=${this.reset}>Reset</button>
+
           ${worldsView(worlds, this.updateWorld.bind(this), this.world)}
         </div>
         <canvas id="canvas" class="square"></canvas>
-        <input
-          class="db w-100 gold"
-          type="range"
-          min="0"
-          value=${this.index ? this.index() : 0}
-          max=${this.indexes || 0}
-          step="1"
-          @input=${e => this.index?.(e.target.value)}
-        />
+        <div class="db w-100">
+          <button @click=${this.handleRun}>Run</button>
+          <button class="" @click=${this.reset}>Reset</button>
+          <input
+            class="w-70"
+            type="range"
+            min="0"
+            value=${this.index ? this.index() : 0}
+            max=${this.indexes || 0}
+            step="1"
+            @input=${e => this.index?.(e.target.value)}
+          />
+        </div>
       </div>
       <file-sidebar
         .setToast=${toast => (this.toast = toast)}
