@@ -135,8 +135,9 @@ export class FileSidebar extends LitElement {
   };
 
   deleteFile = fname => {
+    console.log(fname);
     this.setToast(
-      'oh, goodbye then ' + (Math.random() > 0.5 ? 'Mr.' : 'Ms.' + fname)
+      'Oh, goodbye then ' + ((Math.random() > 0.5 ? 'Mr. ' : 'Ms. ') + fname)
     );
     this.editor?.remove(fname);
     this.requestUpdate();
