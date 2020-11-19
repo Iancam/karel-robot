@@ -43,10 +43,10 @@ export class MyToaster extends LitElement {
     ];
   }
 
-  timeout = 3000;
+  timeout = 10000;
   render() {
     return html`<div
-      class="absolute left-50 top-10 ${this.msg ? 'show' : 'dn'}"
+      class="absolute left-50 top-0 mt2 ${this.msg ? 'show' : 'dn'}"
     >
       <div class="orange pa2 br3 ba b--gray avenir left-neg-50 relative">
         ${this.msg}
