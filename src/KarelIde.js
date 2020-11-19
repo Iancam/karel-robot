@@ -89,6 +89,12 @@ export class KarelIde extends LitElement {
         .vw-100 {
           width: 100vw;
         }
+        .ma-auto {
+          margin: auto;
+        }
+        .a-ic {
+          align-items: center;
+        }
       `,
       show,
     ];
@@ -129,42 +135,73 @@ export class KarelIde extends LitElement {
 
   render() {
     return html`
-      <div class=${this.class /*+ (this.sidebarExpanded ? ' mr-25' : ' mr2')*/}>
-        <div class="vh-10 overflow-hidden">
-          <my-toaster msg=${this.toast ?? ''}></my-toaster>
-          <label htmlFor="">speed</label>
+      <div
+        id="header"
+        class="bg-black-80 hover-bg-gold bg-animate w-100 dib fixed pa3 h3 left-0 flex v-mid near-white avenir"
+      >
+        <button
+          class="br-100 dib h2 w2 pa2 bg-near-white tc a-ic mr2 pointer hover-bg-yellow bg-animate b--none"
+          @click=${this.handleRun}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 17 17"
+            focusable="false"
+            aria-hidden="true"
+          >
+            <path d="M17 8.5L0 17V0z" fill="#000000" fill-rule="evenodd"></path>
+          </svg>
+        </button>
+        <button
+          class="mr2 pointer hover-bg-yellow bg-animate br2 b--none"
+          @click=${this.reset}
+        >
+          Reset
+        </button>
+        <my-toaster msg=${this.toast ?? ''}></my-toaster>
+
+        <select
+          class="mr2"
+          name="language"
+          @change=${e => this.updateLanguage(e.target.value)}
+        >
+          ${this.languages.map(
+            ({ value, text }) =>
+              html`<option ?selected=${this.language === value} value=${value}>
+                ${text}
+              </option>`
+          )}
+        </select>
+        <div class="order-2 mr2 ml-auto">
+          <label class="mr2" htmlFor="">speed</label>
           <input
-            class=""
+            class="mr2 mr2"
             type="range"
             min="0"
+            step="1"
             value=${this.speed ? this.speed() : 0}
             max=${500}
-            step="1"
             @input=${e => this.speed?.(500 - e.target.value)}
           />
-          <select
-            name="language"
-            @change=${e => this.updateLanguage(e.target.value)}
-          >
-            ${this.languages.map(
-              ({ value, text }) =>
-                html`<option
-                  ?selected=${this.language === value}
-                  value=${value}
-                >
-                  ${text}
-                </option>`
-            )}
-          </select>
 
-          ${worldsView(worlds, this.updateWorld.bind(this), this.world)}
+          ${worldsView({
+            worlds,
+            onSelect: this.updateWorld.bind(this),
+            selected: this.world,
+            className: 'mr3',
+          })}
         </div>
+      </div>
+      <div
+        class=${this.class +
+        ' mt5' /*+ (this.sidebarExpanded ? ' mr-25' : ' mr2')*/}
+      >
+        <div class="vh-10 overflow-hidden"></div>
         <canvas id="canvas" class="square"></canvas>
         <div class="db w-100">
-          <button @click=${this.handleRun}>Run</button>
-          <button class="" @click=${this.reset}>Reset</button>
           <input
-            class="w-70"
+            class="w-100"
             type="range"
             min="0"
             value=${this.index ? this.index() : 0}
