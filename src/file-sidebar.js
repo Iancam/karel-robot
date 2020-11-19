@@ -127,7 +127,7 @@ export class FileSidebar extends LitElement {
   loadFile = fname => {
     const { language, world, code } = this.editor.load(fname);
     this.editor.setCode(code);
-    this.updateLanguage(language);
+    this.editor.setLanguage(language);
     this.updateWorld(world);
     this.setToast('tada!');
     this.requestUpdate();

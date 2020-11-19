@@ -214,6 +214,8 @@ export class KarelIde extends LitElement {
       <file-sidebar
         .setToast=${toast => (this.toast = toast)}
         .editor=${this.editor}
+        .updateWorld=${this.updateWorld.bind(this)}
+        .world=${this.world}
       ></file-sidebar>
     `;
   }
