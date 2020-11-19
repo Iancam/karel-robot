@@ -2,7 +2,6 @@ export const updateStatery = (states, diffs, onUpdate, diffOffset = -1) => {
   return {
     indexes: states.length,
     updateState: index => {
-      console.log(index, states.length);
       if (!states[index]) return false;
       onUpdate(
         states[index],

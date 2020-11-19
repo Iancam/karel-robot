@@ -45,9 +45,10 @@ export class KarelIde extends LitElement {
   worlds = keyBy(worlds, 'name');
 
   updateWorld(world) {
+    console.log({ world, worlds: this.worlds });
     this.world = world;
+    this.index = undefined;
     this.handleResize();
-    this.reset?.();
   }
   world = '10x10';
 
@@ -114,10 +115,10 @@ export class KarelIde extends LitElement {
       canvas.width = width;
       canvas.height = height;
     }
-    draw(
-      this.canvas,
-      this.states?.[this.stateIndex] || this.worlds[this.world].world
-    );
+    const world = this.worlds[this.world].world;
+    this.index !== undefined
+      ? this.index(this.index())
+      : draw(this.canvas, world);
   }
   connectedCallback() {
     super.connectedCallback();

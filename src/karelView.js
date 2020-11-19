@@ -2,7 +2,7 @@
 
 import directionTransforms from './directionUtils';
 import { toDegrees, vAdd, vMul } from './utils';
-import { debounce } from 'lodash-es';
+
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {import('./karelModel').karelState} karelState
@@ -129,4 +129,4 @@ const draw = (canvas, karelState) => {
     ctx.closePath();
   }
 };
-export default debounce(draw, 50, { cancel: true });
+export default draw; //debounce(draw, 50, { cancel: true });
