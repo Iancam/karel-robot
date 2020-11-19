@@ -15,10 +15,12 @@ export class MyToaster extends LitElement {
     this._msg = msg;
     this.requestUpdate('msg', oldVal);
     this.timeId && clearTimeout(this.timeId);
-    this.timeId = setTimeout(() => {
-      this._msg = undefined;
-      this.requestUpdate();
-    }, this.timeout);
+    if (this._msg) {
+      this.timeId = setTimeout(() => {
+        this._msg = undefined;
+        this.requestUpdate();
+      }, this.timeout);
+    }
   }
 
   get msg() {
@@ -43,7 +45,7 @@ export class MyToaster extends LitElement {
     ];
   }
 
-  timeout = 10000;
+  timeout = 3000;
   render() {
     return html`<div
       class="absolute left-50 top-0 mt2 ${this.msg ? 'show' : 'dn'}"
