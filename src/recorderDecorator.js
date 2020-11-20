@@ -15,10 +15,15 @@ export const recorderDecorator = (diffEngine, options) => {
     engine: diff => {
       if (!options.ignoreUndefined || diff) {
         diffs.push({ ...diff });
-        const nextState = diffEngine(diff);
-        states.push(cloneDeep(nextState));
-        if (states.length > 3000)
-          throw 'karel is tired. Is karel in an infinite loop?';
+        try {
+          const nextState = diffEngine(diff);
+          states.push(cloneDeep(nextState));
+          if (states.length > 5000)
+            throw 'karel is tired. Is karel in an infinite loop?';
+        } catch (error) {
+          states.push({ error });
+          throw error;
+        }
       }
       return last(states);
     },

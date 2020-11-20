@@ -63,7 +63,9 @@ export class KarelIde extends LitElement {
       diffs,
       (state, diff) => {
         this.editor.highlightLine(diff?.lineNumber, 'bg-gold');
-        draw(this.canvas, state);
+        state.error
+          ? (this.toast = { msg: state.error, error: true })
+          : draw(this.canvas, state);
         this.requestUpdate();
       }
     );
@@ -160,7 +162,7 @@ export class KarelIde extends LitElement {
         >
           Reset
         </button>
-        <my-toaster msg=${this.toast ?? ''}></my-toaster>
+        <my-toaster .msg=${this.toast}></my-toaster>
 
         <select
           class="mr2"
@@ -213,7 +215,7 @@ export class KarelIde extends LitElement {
         </div>
       </div>
       <file-sidebar
-        .setToast=${toast => (this.toast = toast)}
+        .setToast=${toast => (this.toast = { msg: toast })}
         .editor=${this.editor}
         .updateWorld=${this.updateWorld.bind(this)}
         .world=${this.world}
