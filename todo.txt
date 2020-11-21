@@ -1,7 +1,5 @@
 create api server (/api) √
   
-
-
 create a remote session
   generate key to share
     create a new channel with a 6 digit id
@@ -23,4 +21,19 @@ set javascript as default language if none found
 front is clear not working √
 make speed work all the time √
 using scroll should cancel animation √
-improve saving
+improve saving √
+add python True, false √
+loop head with extra space after causes error √
+world doesn't update when switched √
+Label the speed and step sliders √
+random saving files when enter is clicked after saved √
+add beeper number √
+missing file name from delete file√
+can't read file √
+no update world after running √
+put errors at end of animation loop √
+python needs ending line to work √
+
+add instructions for ctrl-click
+add lessons
+skip boring actions option
