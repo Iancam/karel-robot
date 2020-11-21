@@ -74,7 +74,10 @@
     <title>karel-ide</title>
   </head>
   <body>
-    <div id="editor" class="absolute mt5 pt2 ml1 square b--black ba br2"></div>
+    <div
+      id="editor"
+      class="absolute mt5 pt2 ml1 square b--black ba br2 overflow-scroll"
+    ></div>
     <karel-ide id="karel" class="mb3 mr3 fr bg-near-white"></karel-ide>
     <script type="module">
       import { addEditor } from './src/editor.js';
@@ -89,9 +92,9 @@
 
     <script type="module" src="./src/karel-ide.js"></script>
     <div
-      class="bottom-0 bg-light-yellow black-70 w-100 h2 dib pa2 avenir tc f6"
+      class="bottom-0 fixed bg-yellow black-70 w-100 h2 dib pb1 avenir tc f6"
     >
-      <div>
+      <div class="">
         Inspired by
         <a href="http://stanford.edu/~cpiech/karel/ide.html">Stanford Karel</a>.
         <span class="f3">&squf;</span> Karel SVG taken from Sophia Westwood's
