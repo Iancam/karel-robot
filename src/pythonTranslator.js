@@ -38,6 +38,7 @@ function addBracketsFactory() {
 
 export function javascriptify(input) {
   const rawLines = input.split('\n');
+  rawLines.push('');
   const addBrackets = addBracketsFactory();
   const lines = rawLines.reduce((lines, line, i) => {
     const prevLine = last(lines);
