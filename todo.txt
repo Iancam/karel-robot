@@ -33,7 +33,11 @@ can't read file √
 no update world after running √
 put errors at end of animation loop √
 python needs ending line to work √
+add lessons:
+      - add show/hide world function to ide
+      - add onHover to trigger ide action
+
 
 add instructions for ctrl-click
-add lessons
+
 skip boring actions option

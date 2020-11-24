@@ -22,6 +22,7 @@ export class KarelIde extends LitElement {
       sidebarExpanded: { type: Boolean },
       world: { type: String },
       toast: { type: String },
+      displayAltCanvas: { type: Boolean },
     };
   }
 
@@ -106,17 +107,23 @@ export class KarelIde extends LitElement {
     return this.shadowRoot.querySelector('#canvas');
   }
 
+  get canvasAlt() {
+    return this.shadowRoot.querySelector('#canvasAlt');
+  }
+
   // allows canvas sizing to be determined by css
-  handleResize() {
-    let canvas = this.canvas;
+  handleResize(canvas) {
+    canvas ??= this.canvas;
+
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-
+    console.log(width, height);
     // If it's resolution does not match change it
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
     }
+    console.log(canvas);
     const world = this.worlds[this.world].world;
     this.index !== undefined
       ? this.index(this.index())
@@ -124,12 +131,28 @@ export class KarelIde extends LitElement {
   }
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('resize', this.handleResize.bind(this));
+    window.addEventListener('resize', () => {
+      this.handleResize(this.canvas);
+      this.handleResize(this.canvasAlt);
+    });
   }
   disconnectedCallback() {
     window.removeEventListener('resize', this.handleResize.bind(this));
     window.removeventListener('keydown', this.onSave.bind(this), false);
     super.disconnectedCallback();
+  }
+
+  overlay(karelState) {
+    this.handleResize(this.canvasAlt);
+    draw(this.canvasAlt, karelState);
+    console.log('la di da');
+
+    this.displayAltCanvas = true;
+  }
+
+  hideOverlay() {
+    console.log('da di la');
+    this.displayAltCanvas = false;
   }
 
   firstUpdated() {
@@ -157,7 +180,7 @@ export class KarelIde extends LitElement {
           </svg>
         </button>
         <button
-          class="mr2 pointer hover-bg-yellow bg-animate br2 b--none"
+          class="mr2 pointer hover-bg-yellow bg-animate br0 b--none"
           @click=${this.reset}
         >
           Reset
@@ -177,9 +200,16 @@ export class KarelIde extends LitElement {
           )}
         </select>
         <div class="order-2 mr2 ml-auto">
+          <div
+            @mouseover=${() => this.overlay(this.worlds[this.world].world)}
+            @mouseout=${() => this.hideOverlay()}
+            class="dark-gray bg-yellow hover-bg-light-yellow dib pa2 mr2"
+          >
+            Solution
+          </div>
           <label class="mr2" htmlFor="">speed</label>
           <input
-            class="mr2 mr2"
+            class="mr2"
             type="range"
             min="0"
             step="1"
@@ -192,16 +222,21 @@ export class KarelIde extends LitElement {
             worlds,
             onSelect: this.updateWorld.bind(this),
             selected: this.world,
-            className: 'mr3',
+            className: 'mr3 pa1 br0',
           })}
         </div>
       </div>
-      <div
-        class=${this.class +
-        ' mt5' /*+ (this.sidebarExpanded ? ' mr-25' : ' mr2')*/}
-      >
-        <div class="vh-10 overflow-hidden"></div>
-        <canvas id="canvas" class="square"></canvas>
+      <div class=${this.class + ' mt5'}>
+        <canvas
+          id="canvasAlt"
+          class="square ${this.displayAltCanvas
+            ? 'bg-light-yellow'
+            : 'absolute o-0'}"
+        ></canvas>
+        <canvas
+          id="canvas"
+          class="square ${this.displayAltCanvas ? 'dn' : ''}"
+        ></canvas>
         <div class="db w-100">
           <input
             class="w-100"
