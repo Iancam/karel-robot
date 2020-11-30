@@ -3,7 +3,7 @@ import tachyons from './tachyons.min.css';
 import draw from './karelView';
 import './file-sidebar';
 import { worldsView } from './worldsView';
-import { worlds } from './worlds';
+import { worldsFactory } from './worlds';
 import { keyBy } from 'lodash-es';
 import { show } from './show.css';
 import './my-toaster';
@@ -23,8 +23,14 @@ export class KarelIde extends LitElement {
       world: { type: String },
       toast: { type: String },
       displayAltCanvas: { type: Boolean },
+      showingLessons: { type: Boolean },
     };
   }
+
+  worlds = worldsFactory(() => {
+    this.index = undefined;
+    this.handleResize.bind(this)();
+  });
 
   get files() {
     return this.editor?.listFiles();
@@ -43,21 +49,11 @@ export class KarelIde extends LitElement {
     return this.editor?.language();
   }
 
-  worlds = keyBy(worlds, 'name');
-
-  updateWorld(world) {
-    console.log({ world, worlds: this.worlds });
-    this.world = world;
-    this.index = undefined;
-    this.handleResize();
-  }
-  world = '10x10';
-
   async handleRun() {
     const { states, diffs } = codeToStates(
       this.editor.getCode(),
       this.language,
-      this.worlds[this.world].world
+      this.worlds.currentWorld
     );
     const { updateState, indexes } = updateStatery(
       states,
@@ -117,14 +113,12 @@ export class KarelIde extends LitElement {
 
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-    console.log(width, height);
     // If it's resolution does not match change it
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
     }
-    console.log(canvas);
-    const world = this.worlds[this.world].world;
+    const world = this.worlds.currentWorld;
     this.index !== undefined
       ? this.index(this.index())
       : draw(this.canvas, world);
@@ -145,7 +139,6 @@ export class KarelIde extends LitElement {
   overlay(karelState) {
     this.handleResize(this.canvasAlt);
     draw(this.canvasAlt, karelState);
-    console.log('la di da');
 
     this.displayAltCanvas = true;
   }
@@ -160,72 +153,90 @@ export class KarelIde extends LitElement {
   }
 
   render() {
-    return html`
-      <div
-        id="header"
-        class="bg-black-80 hover-bg-gold bg-animate w-100 dib fixed pa3 h3 left-0 flex v-mid near-white avenir"
+    const showSolution = ({ start, solution }) => html`<div
+      @mouseover=${() => this.overlay(solution?.world)}
+      @mouseout=${() => this.hideOverlay()}
+      @click=${() => this.worlds.select(start.name)}
+      class="dark-gray bg-yellow hover-bg-light-yellow dib pa2 mr2"
+    >
+      ${start.name}
+    </div>`;
+
+    const lessonsToggle = html`<div
+      @click=${() => (this.showingLessons = !this.showingLessons)}
+      class="dark-gray bg-orange hover-bg-light-orange dib pa2 mr2 ttc"
+    >
+      ${this.showingLessons ? 'worlds' : 'lessons'}
+    </div>`;
+
+    const header = html`<div
+      id="header"
+      class="bg-black-80 bg-animate w-100 dib fixed pa3 h3 left-1 ml1 flex v-mid near-white avenir"
+    >
+      <button
+        class="br-100 dib h2 w2 pa2 bg-near-white tc a-ic mr2 pointer hover-bg-yellow bg-animate b--none"
+        @click=${this.handleRun}
       >
-        <button
-          class="br-100 dib h2 w2 pa2 bg-near-white tc a-ic mr2 pointer hover-bg-yellow bg-animate b--none"
-          @click=${this.handleRun}
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 17 17"
+          focusable="false"
+          aria-hidden="true"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 17 17"
-            focusable="false"
-            aria-hidden="true"
-          >
-            <path d="M17 8.5L0 17V0z" fill="#000000" fill-rule="evenodd"></path>
-          </svg>
-        </button>
-        <button
-          class="mr2 pointer hover-bg-yellow bg-animate br0 b--none"
-          @click=${this.reset}
-        >
-          Reset
-        </button>
-        <my-toaster .msg=${this.toast}></my-toaster>
+          <path d="M17 8.5L0 17V0z" fill="#000000" fill-rule="evenodd"></path>
+        </svg>
+      </button>
+      <button
+        class="mr2 pointer hover-bg-yellow bg-animate br0 b--none"
+        @click=${this.reset}
+      >
+        Reset
+      </button>
+      <my-toaster .msg=${this.toast}></my-toaster>
 
-        <select
+      <select
+        class="mr2"
+        name="language"
+        @change=${e => this.updateLanguage(e.target.value)}
+      >
+        ${this.languages.map(
+          ({ value, text }) =>
+            html`<option ?selected=${this.language === value} value=${value}>
+              ${text}
+            </option>`
+        )}
+      </select>
+
+      <!-- right hand side -->
+      <div class="order-2 mr2 ml-auto">
+        ${this.worlds.lessonOptions.map(option => showSolution(option))}
+        <label class="mr2" htmlFor="">speed</label>
+        <input
           class="mr2"
-          name="language"
-          @change=${e => this.updateLanguage(e.target.value)}
-        >
-          ${this.languages.map(
-            ({ value, text }) =>
-              html`<option ?selected=${this.language === value} value=${value}>
-                ${text}
-              </option>`
-          )}
-        </select>
-        <div class="order-2 mr2 ml-auto">
-          <div
-            @mouseover=${() => this.overlay(this.worlds[this.world].world)}
-            @mouseout=${() => this.hideOverlay()}
-            class="dark-gray bg-yellow hover-bg-light-yellow dib pa2 mr2"
-          >
-            Solution
-          </div>
-          <label class="mr2" htmlFor="">speed</label>
-          <input
-            class="mr2"
-            type="range"
-            min="0"
-            step="1"
-            value=${this.speed ? this.speed() : 0}
-            max=${500}
-            @input=${e => this.speed?.(500 - e.target.value)}
-          />
+          type="range"
+          min="0"
+          step="1"
+          value=${this.speed ? this.speed() : 0}
+          max=${500}
+          @input=${e => this.speed?.(500 - e.target.value)}
+        />
 
-          ${worldsView({
-            worlds,
-            onSelect: this.updateWorld.bind(this),
-            selected: this.world,
-            className: 'mr3 pa1 br0',
-          })}
-        </div>
+        ${worldsView({
+          worlds: (this.showingLessons
+            ? this.worlds.lessons
+            : this.worlds.worlds
+          ).map(lesson => lesson.id),
+          onSelect: this.worlds.select.bind(this),
+          selected: this.worlds.currentId,
+          className: 'mr3 pa1 br0',
+        })}
+        ${lessonsToggle}
       </div>
+    </div>`;
+
+    return html`
+      ${header}
       <div class=${this.class + ' mt5'}>
         <canvas
           id="canvasAlt"
@@ -252,8 +263,8 @@ export class KarelIde extends LitElement {
       <file-sidebar
         .setToast=${toast => (this.toast = { msg: toast })}
         .editor=${this.editor}
-        .updateWorld=${this.updateWorld.bind(this)}
-        .world=${this.world}
+        .updateWorld=${this.worlds.select.bind(this)}
+        .world=${this.worlds.currentId}
       ></file-sidebar>
     `;
   }

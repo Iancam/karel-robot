@@ -9,7 +9,7 @@ export function worldsView({ worlds, onSelect, selected, className }) {
       @change=${e => onSelect(e.target.value)}
     >
       ${worlds.map(
-        ({ name }) =>
+        name =>
           html`<option ?selected=${selected === name} value=${name}>
             ${name}
           </option>`
