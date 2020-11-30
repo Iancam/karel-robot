@@ -135,7 +135,6 @@ export class FileSidebar extends LitElement {
   };
 
   deleteFile = fname => {
-    console.log(fname);
     this.setToast(
       'Oh, goodbye then ' + ((Math.random() > 0.5 ? 'Mr. ' : 'Ms. ') + fname)
     );
@@ -155,7 +154,7 @@ export class FileSidebar extends LitElement {
     return html`
       <div class="">
         <div
-          class="vh-100 v overflow-scroll ba b-black bg-near-white fixed top-0 right-0 ${this
+          class="vh-100 v overflow-scroll ba b-black bg-near-white fixed top-0 left-0 ${this
             .sidebarExpanded
             ? 'w-25'
             : 'w2'}"
