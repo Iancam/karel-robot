@@ -65,6 +65,7 @@ export class KarelIde extends LitElement {
         this.language,
         this.worlds.currentWorld
       );
+      console.log({ states, diffs });
       const handleTransition = (state, diff) => {
         this.editor.highlightLine(diff?.lineNumber, 'bg-gold');
         state.error
@@ -87,7 +88,7 @@ export class KarelIde extends LitElement {
       this.requestUpdate();
     } catch (error) {
       this.toast = { msg: error.name };
-      console.error(error);
+      console.log(error);
     }
   }
 

@@ -16,7 +16,11 @@ export function codeToStates(code, language, world, interpret) {
   const karel = karelInterface(engine, {
     middleware: [addLineIndexMiddleware],
   });
+  try {
+    _runCode(lineNumberCode, karel, pythonGlobals);
+  } catch (error) {
+    if (error.name === 'SyntaxError') throw error;
+  }
 
-  _runCode(lineNumberCode, karel, pythonGlobals);
   return { states: getStates(), diffs: getDiffs() };
 }
