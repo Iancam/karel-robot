@@ -36,8 +36,10 @@ python needs ending line to work √
 add lessons:
       - add show/hide world function to ide
       - add onHover to trigger ide action
-
+add toggle for lessons/worlds on the right, where the orange and green buttons are 
+push filesystem sidebar to the left, add save, load
 
 add instructions for ctrl-click
 
 skip boring actions option
+refactor out control panel

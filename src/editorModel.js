@@ -3,9 +3,13 @@ export async function EditorModel(monacoEditor, options) {
   let openFile = undefined;
   let language = 'javascript';
   let decorations = [];
-  const starterCode = `function main(){
+  const starterCode = {
+    javascript: `function main(){
     // your code goes here!
-  }`;
+  }`,
+    python: `def main():
+    \t#your code goes here!`,
+  };
 
   const that = {
     setLanguage: function (lang) {
@@ -71,7 +75,7 @@ export async function EditorModel(monacoEditor, options) {
       const { code, language: lang } = JSON.parse(
         localStorage.getItem('sessionCode')
       ) ?? {
-        code: starterCode,
+        code: starterCode[lang],
         language,
       };
       this.setCode(code);

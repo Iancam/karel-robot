@@ -16,7 +16,7 @@ export function codeToStates(code, language, world, interpret) {
   const karel = karelInterface(engine, {
     middleware: [addLineIndexMiddleware],
   });
-  _runCode(lineNumberCode, karel, pythonGlobals);
 
+  _runCode(lineNumberCode, karel, pythonGlobals);
   return { states: getStates(), diffs: getDiffs() };
 }

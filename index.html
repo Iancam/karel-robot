@@ -23,12 +23,8 @@
        * @param {import('./karelModel').karelState} initialWorld
        */
       function _runCode(code, karelInterface, globals) {
-        try {
-          with ({ ...karelInterface, ...globals, code }) {
-            eval(code + '\nmain()');
-          }
-        } catch (error) {
-          console.log(error);
+        with ({ ...karelInterface, ...globals, code }) {
+          eval(code + '\nmain()');
         }
       }
     </script>

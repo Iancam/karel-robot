@@ -29,10 +29,11 @@ export const animatery = (speed, update) => {
         animating = false;
         update(newIndex);
       }
-      return newIndex ? (speed = newIndex) : index;
+      return newIndex && index;
     },
 
     animate: () => {
+      console.log(speed);
       const animator = ts => {
         if (!animating) return false;
         if (last === undefined) last = ts;

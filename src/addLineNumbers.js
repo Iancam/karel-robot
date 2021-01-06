@@ -7,7 +7,7 @@ export const addLineNumbers = code => {
       if (line.includes('function') || line.includes('=>')) {
         return line;
       }
-      return line.replace(/[\w\d]+\(\)/, match => {
+      return line.replace(/[\w\d]+\(\)/g, match => {
         return `${match.slice(undefined, -2)}({lineNumber:${i + 1}})`;
       });
     })
@@ -21,7 +21,11 @@ export const addLineNumbers = code => {
 export const addLineIndexMiddleware = func => {
   return args => {
     const { lineNumber } = args;
-    const [diff, val] = func(args);
-    return [{ ...diff, lineNumber }, val];
+    try {
+      const [diff, val] = func(args);
+      return [{ ...diff, lineNumber }, val];
+    } catch (e) {
+      throw e + ' at line ' + lineNumber;
+    }
   };
 };

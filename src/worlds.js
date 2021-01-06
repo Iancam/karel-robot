@@ -5,51 +5,41 @@ const defaults = {
   karel: { cell: [1, 1], direction: 'e' },
   beepers: [],
 };
-const worlds = range(1, 16)
-  .map(i => ({
-    name: `${i}x${i}`,
-    world: {
-      dimensions: [i, i],
-    },
-  }))
-  .map(handleWorlds);
-const toLesson = world => {
-  return { id: world.name, options: [{ start: world }] };
-};
+const _worlds = range(1, 16).map(i => ({
+  id: `${i}x${i}`,
+  world: {
+    dimensions: [i, i],
+  },
+}));
 
-const _lessons = [
+const _groups = [
   //newspaper
   {
     id: 'newspaper',
     options: [
       {
+        id: 'newspaper',
         start: {
-          name: 'newspaper',
-          world: {
-            dimensions: [5, 5],
-            walls: [
-              [2, 2],
-              [2, 2],
-              [2, 3],
-              [2, 4],
-              [2, 5],
-              [3, 2],
-              [3, 5],
-              [4, 2],
-              [4, 5],
-              [5, 2],
-              [5, 4],
-            ],
-            beepers: [[3, 5]],
-            karel: { cell: [4, 2], direction: 'e' },
-          },
+          dimensions: [5, 5],
+          walls: [
+            [2, 2],
+            [2, 2],
+            [2, 3],
+            [2, 4],
+            [2, 5],
+            [3, 2],
+            [3, 5],
+            [4, 2],
+            [4, 5],
+            [5, 2],
+            [5, 4],
+          ],
+          beepers: [[3, 5]],
+          karel: { cell: [4, 2], direction: 'e' },
         },
         solution: {
-          name: 'newspaper',
-          world: {
-            beepers: [[4, 3]],
-            karel: { cell: [4, 2], direction: 'e' },
-          },
+          beepers: [[4, 3]],
+          karel: { cell: [4, 2], direction: 'e' },
         },
       },
     ],
@@ -57,87 +47,85 @@ const _lessons = [
   {
     id: 'columns',
     options: [[2, 5, 7], [3, 5, 8], [2]].map((columns, i) => ({
+      id: 'column ' + i,
       start: {
-        name: 'column ' + i,
-        world: {
-          dimensions: [8, 8],
-          beepers: columns.map(x => [1, x]),
-        },
+        dimensions: [8, 8],
+        beepers: columns.map(x => [1, x]),
       },
       solution: {
-        name: 'column ' + i + ' Soln',
-        world: {
-          beepers: columns
-            .map(x => [1, x])
-            .map(([y, x]) => range(y, 8 + 1).map(y => [y, x]))
-            .flat(),
-          karel: { cell: [1, 8], direction: 'e' },
-        },
+        beepers: columns
+          .map(x => [1, x])
+          .map(([y, x]) => range(y, 8 + 1).map(y => [y, x]))
+          .flat(),
+        karel: { cell: [1, 8], direction: 'e' },
       },
     })),
   },
   {
     id: 'midpoint',
-    options: [worlds[5], worlds[6], worlds[14]].map(world => ({
-      start: {
-        name: world.name + ' Midpoint',
-        world: world.world,
-      },
+    options: [_worlds[5], _worlds[6], _worlds[14]].map(world => ({
+      id: world.id + ' Midpoint',
+      start: world.world,
       solution: {
-        name: world.name + ' Midpoint ' + 'Soln',
-        world: {
-          beepers: [[1, Math.floor(world.world.dimensions[0] / 2)]],
-        },
+        beepers: [[1, Math.floor(world.world.dimensions[0] / 2)]],
       },
     })),
   },
-].map(handleLesson);
+].reduce(
+  ({ starts, solutions }, group) => {
+    group.options.forEach(({ id, start, solution }) => {
+      starts.push({ group_id: group.id, id, world: fixWorldIndexing(start) });
+      solutions.push({
+        group_id: group.id,
+        id,
+        world: fixWorldIndexing({ ...start, ...solution }),
+      });
+    });
+    return { starts, solutions };
+  },
+  { starts: [], solutions: [] }
+);
 
 function fixWorldIndexing(world) {
   const pointKeys = ['karel.cell', 'beepers'];
   const transform = point => vSub([point[1], point[0]], [1, 1]);
 
   return {
-    ...world,
+    ...defaults,
     karel: {
+      ...defaults.karel,
       ...world.karel,
-      cell: transform(world.karel.cell),
+      cell: transform(world.karel?.cell ?? defaults.karel.cell),
     },
     beepers: world.beepers?.map(transform).map(cell => ({ cell, count: 1 })),
     walls: world.walls?.map(transform),
   };
 }
 
-function handleLesson(lessonGroup) {
-  const options = lessonGroup.options.map(({ start, solution }) => ({
-    start: handleWorlds(start),
-    solution: {
-      ...solution,
-      world: fixWorldIndexing({
-        ...defaults,
-        ...start.world,
-        ...solution.world,
-      }),
-    },
-  }));
-
-  return { ...lessonGroup, options };
-}
-
-function handleWorlds(world) {
-  return {
-    ...world,
-    world: fixWorldIndexing({ ...defaults, ...world.world }),
-  };
-}
-
-const lessonContainsSolution = ({ options }) =>
-  options
-    .map(({ solution }) => solution)
-    .reduce((agg, curr) => agg || curr, false);
+/**
+ *
+ * @typedef {{id:string, group_id:string, world:import('./karelModel').karelState}} lesson
+ */
 
 export function worldsFactory(onChange, defaultId = '10x10') {
-  const lessons = keyBy([..._lessons, ...worlds.map(toLesson)], 'id');
+  const lessons = keyBy(
+    [
+      ..._worlds.map(world => ({
+        id: world.id,
+        world: fixWorldIndexing(world.world),
+      })),
+      ..._groups.starts,
+    ],
+    'id'
+  );
+  const solutions = keyBy(_groups.solutions, 'id');
+  const groups = keyBy(lessons, 'group_id');
+  /**
+   *
+   * @param {lesson} lesson
+   */
+  const lessonHasSolution = lesson => solutions[lesson.id];
+
   let currentId = defaultId;
   let currentOption = 0;
   return {
@@ -145,22 +133,23 @@ export function worldsFactory(onChange, defaultId = '10x10') {
       return currentId;
     },
     get currentWorld() {
-      return lessons[currentId].options[currentOption].start.world;
+      console.log(lessons[currentId].world);
+      return lessons[currentId].world;
     },
     /**
      * @returns {{id:string, options:{start, solution?}[]}}
      */
     get worlds() {
-      return values(lessons).filter(lesson => !lessonContainsSolution(lesson));
+      return values(lessons).filter(lesson => !lessonHasSolution(lesson));
     },
     /**
      * @returns {{id:string, options:{start, solution?}[]}}
      */
     get lessons() {
-      return values(lessons).filter(lessonContainsSolution);
+      return values(lessons).filter(lessonHasSolution);
     },
     get lessonOptions() {
-      return lessons[currentId].options.filter(({ solution }) => solution);
+      return values(groups[lessons[currentId].group_id]);
     },
     select: id => {
       currentId = id;

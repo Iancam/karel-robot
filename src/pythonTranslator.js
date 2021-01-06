@@ -12,25 +12,37 @@ function indents(line) {
 }
 
 function addBracketsFactory() {
-  let indentStack = [0];
-
-  return ({ indentLevel, transform, isTerminal }) => {
+  let indentStack = [{ lineNumber: 0, indent: 0 }];
+  let shouldIndent = false;
+  return ({
+    indentLevel,
+    transform,
+    isTerminal,
+    lineNumber,
+    indentRequest,
+  }) => {
     const dropStack = indentLevel => {
-      while (indentLevel < last(indentStack)) {
+      while (indentLevel < last(indentStack).indent) {
         indentStack.pop();
-        transform = '}' + transform;
+        transform = '}\n' + transform;
       }
     };
     isTerminal && dropStack(0);
     const isComment =
       transform.includes('#') && !transform.split('#')[0].trim().length;
-    const isBlank = transform.length == 0;
+    const isBlank = transform.length === 0;
+    const isEmpty = transform.trim().length === 0;
     if (isComment || isBlank || isTerminal) return transform;
+    if (!isEmpty && shouldIndent && indentLevel <= last(indentStack).indent)
+      throw 'Indentation error on line ' + (lineNumber + 1);
+
     // ignore whitespace in empty lines
-    if (indentLevel > last(indentStack) && transform.trim().length) {
-      indentStack.push(indentLevel);
-      transform = '{' + transform;
+    if (indentLevel > last(indentStack).indent && transform.trim().length) {
+      shouldIndent = false;
+      indentStack.push({ lineNumber, indent: indentLevel });
+      transform = '{\n' + transform;
     }
+    shouldIndent ||= indentRequest;
     dropStack(indentLevel);
     return transform;
   };
@@ -48,6 +60,8 @@ export function javascriptify(input) {
       indentLevel,
       transform: line,
       isTerminal: i == rawLines.length - 1,
+      lineNumber: i,
+      indentRequest: line.trim().endsWith(':'),
     });
     const transform = bracketed
       .replace(/def (.*):/, (__, body) => 'function ' + body)
