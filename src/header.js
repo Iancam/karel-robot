@@ -42,7 +42,6 @@ export const header = ({
       </option>`
     )}
   </select>`;
-  console.log(speed);
   return html`<div
     id="header"
     class="bg-black-80 bg-animate w-100 dib fixed pa3 h3 left-1 ml1 flex v-mid near-white avenir"
