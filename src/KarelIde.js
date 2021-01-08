@@ -21,9 +21,10 @@ export class KarelIde extends LitElement {
       files: { type: Array },
       sidebarExpanded: { type: Boolean },
       world: { type: String },
-      toast: { type: String },
+      _toast: { type: String },
       displayAltCanvas: { type: Boolean },
       showingLessons: { type: Boolean },
+      index: { type: Number },
     };
   }
 
@@ -56,6 +57,16 @@ export class KarelIde extends LitElement {
   get language() {
     return this.editor?.language();
   }
+  set toast(val) {
+    this._toast = val;
+    setTimeout(() => {
+      this._toast = undefined;
+    }, 3000);
+  }
+
+  get toast() {
+    return this._toast;
+  }
 
   async handleRun() {
     try {
@@ -65,12 +76,12 @@ export class KarelIde extends LitElement {
         this.language,
         this.worlds.currentWorld
       );
-      console.log({ states, diffs });
       const handleTransition = (state, diff) => {
         this.editor.highlightLine(diff?.lineNumber, 'bg-gold');
         state.error
           ? (this.toast = { msg: state.error, error: true })
           : draw(this.canvas, state);
+        this.state = state;
         this.requestUpdate();
       };
       const { updateState, indexes } = updateStatery(
@@ -78,16 +89,18 @@ export class KarelIde extends LitElement {
         diffs,
         handleTransition
       );
-      const { animate, reset, speed, index } = animatery(500, updateState);
+      const { animate, reset, speed, index } = animatery(
+        this.speed?.() || 300,
+        updateState
+      );
       animate();
       this.reset = reset;
       this.indexes = indexes;
-      console.log(this.speed?.());
       this.speed = makeUpdator(speed, 'speed', this.speed?.()).bind(this);
       this.index = makeUpdator(index, 'index', 0).bind(this);
       this.requestUpdate();
     } catch (error) {
-      this.toast = { msg: error.name };
+      this.toast = { msg: error.name, error: true };
       console.log(error);
     }
   }
@@ -131,14 +144,14 @@ export class KarelIde extends LitElement {
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     // If it's resolution does not match change it
-    if (canvas.width !== width || canvas.height !== height) {
+    const resolutionMatch = canvas.width === width && canvas.height === height;
+    if (!resolutionMatch) {
       canvas.width = width;
       canvas.height = height;
     }
-    const world = this.worlds.currentWorld;
-    this.index !== undefined
-      ? this.index(this.index())
-      : draw(this.canvas, world);
+    const world = this.state || this.worlds.currentWorld;
+    // this.index !== undefined && this.index(this.index());
+    draw(this.canvas, world);
   }
   connectedCallback() {
     super.connectedCallback();
