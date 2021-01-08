@@ -24,7 +24,7 @@ function addBracketsFactory() {
     const dropStack = indentLevel => {
       while (indentLevel < last(indentStack).indent) {
         indentStack.pop();
-        transform = '}\n' + transform;
+        transform = '}' + transform;
       }
     };
     isTerminal && dropStack(0);
@@ -40,7 +40,7 @@ function addBracketsFactory() {
     if (indentLevel > last(indentStack).indent && transform.trim().length) {
       shouldIndent = false;
       indentStack.push({ lineNumber, indent: indentLevel });
-      transform = '{\n' + transform;
+      transform = '{' + transform;
     }
     shouldIndent ||= indentRequest;
     dropStack(indentLevel);
