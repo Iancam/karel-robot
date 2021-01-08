@@ -97,8 +97,9 @@ function fixWorldIndexing(world) {
       ...world.karel,
       cell: transform(world.karel?.cell ?? defaults.karel.cell),
     },
-    beepers: world.beepers?.map(transform).map(cell => ({ cell, count: 1 })),
-    walls: world.walls?.map(transform),
+    beepers:
+      world.beepers?.map(transform).map(cell => ({ cell, count: 1 })) || [],
+    walls: world.walls?.map(transform) || [],
   };
 }
 
@@ -133,7 +134,6 @@ export function worldsFactory(onChange, defaultId = '10x10') {
       return currentId;
     },
     get currentWorld() {
-      console.log(lessons[currentId].world);
       return lessons[currentId].world;
     },
     /**
