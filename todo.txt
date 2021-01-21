@@ -33,6 +33,19 @@ can't read file √
 no update world after running √
 put errors at end of animation loop √
 python needs ending line to work √
+karel should start with legit code depending on language √
+when no indentation, complain √
+karel should complain with syntax error! ~√
+clicking on the play button twice ruins things √
+fix the 2 param if statement: √
+yellow is in wrong place √
+reset after error should clear error message √
+karel should have a better speed slider √
+fix orange trail so it shows up on drag √
+make it harder to delete your files
+save file repeating after save
+
+
 add lessons:
       - add show/hide world function to ide
       - add onHover to trigger ide action
