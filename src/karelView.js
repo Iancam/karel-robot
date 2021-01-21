@@ -14,7 +14,7 @@ export const karelView = ({ displayAltCanvas, index, indexes, className }) => {
         value=${index ? index() : 0}
         max=${indexes || 0}
         step="1"
-        @input=${e => index?.(e.target.value)}
+        @input=${e => index?.(parseInt(e.target.value))}
       />
     </div>
   </div>`;
