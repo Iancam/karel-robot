@@ -155,14 +155,14 @@ export class KarelIde extends LitElement {
   }
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('resize', () => {
+    this._resizers = (() => {
       this.handleResize(this.canvas);
       this.handleResize(this.canvasAlt);
-    });
+    }).bind(this);
+    window.addEventListener('resize', this._resizers);
   }
   disconnectedCallback() {
-    window.removeEventListener('resize', this.handleResize.bind(this));
-    window.removeventListener('keydown', this.onSave.bind(this), false);
+    window.removeEventListener('resize', this._resizers);
     super.disconnectedCallback();
   }
 
