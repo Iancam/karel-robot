@@ -82,7 +82,7 @@ export class FileSidebar extends LitElement {
   }
 
   openSave() {
-    this.sidebarExpanded = true;
+    this.toggleSidebar();
     this.newFile = true;
     // wait for the saveFileNameElement to show
     const saveCommitted = e => {
@@ -116,10 +116,31 @@ export class FileSidebar extends LitElement {
     this.saveFileNameElement.textContent = '';
     this.requestUpdate();
   }
+
+  handleExitClick(ev) {
+    const container = this.shadowRoot.querySelector('#sidebarContainer');
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    const clickedInSidebar =
+      ev.clientX > 0 &&
+      ev.clientX < width &&
+      ev.clientY > 0 &&
+      ev.clientY < height;
+    if (!clickedInSidebar) {
+      this.toggleSidebar();
+    }
+  }
+
   toggleSidebar = () => {
     this.sidebarExpanded = !this.sidebarExpanded;
+    if (this.sidebarExpanded) {
+      this._handler = this.handleExitClick.bind(this);
+
+      window.addEventListener('click', this._handler, false);
+    }
     if (!this.sidebarExpanded) {
       this.newFile = false;
+      window.removeEventListener('click', this._handler, false);
     }
     this.requestUpdate();
   };
@@ -142,58 +163,49 @@ export class FileSidebar extends LitElement {
     this.requestUpdate();
   };
 
-  connectedCallback() {
-    super.connectedCallback();
-    window.addEventListener('keydown', this.onSave.bind(this), false);
-  }
-  disconnectedCallback() {
-    window.removeventListener('keydown', this.onSave.bind(this), false);
-    super.disconnectedCallback();
-  }
   render() {
     return html`
-      <div class="">
-        <div
-          class="vh-100 v overflow-scroll ba b-black bg-near-white fixed top-0 left-0 ${this
-            .sidebarExpanded
-            ? 'w-25'
-            : 'w2'}"
-        >
-          <div class="dib marginFix">
-            <div
-              @click=${this.toggleSidebar}
-              class="${this.sidebarExpanded
-                ? 'bg-gold hover-bg-orange fl'
-                : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
-            ></div>
-            <div
-              @click=${this.openSave}
-              class=${(this.sidebarExpanded ? 'fl ' : '') +
-              'bg-green hover-bg-yellow bg-animate pointer w2 h2'}
-            ></div>
-          </div>
-          ${file({
-            name: '',
-            getName: true,
-            date: new Date(),
-            language: this.editor?.language(),
-            className: this.newFile ? 'db' : 'dn',
-            removeClicked: this.endSave.bind(this),
-            fileClicked: () => this.saveFileNameElement.focus(),
-          })}
-          ${this.sidebarExpanded
-            ? this.editor
-                ?.listFiles()
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .map(f =>
-                  file({
-                    ...f,
-                    fileClicked: this.loadFile,
-                    removeClicked: this.deleteFile,
-                  })
-                )
-            : ''}
+      <div
+        id="sidebarContainer"
+        class="vh-100 v overflow-scroll ba b-black bg-near-white fixed top-0 left-0 ${this
+          .sidebarExpanded
+          ? 'w-25'
+          : 'w2'}"
+      >
+        <div class="dib marginFix">
+          <div
+            @click=${this.toggleSidebar}
+            class="${this.sidebarExpanded
+              ? 'bg-gold hover-bg-orange fl'
+              : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
+          ></div>
+          <div
+            @click=${this.openSave}
+            class=${(this.sidebarExpanded ? 'fl ' : '') +
+            'bg-green hover-bg-yellow bg-animate pointer w2 h2'}
+          ></div>
         </div>
+        ${file({
+          name: '',
+          getName: true,
+          date: new Date(),
+          language: this.editor?.language(),
+          className: this.newFile ? 'db' : 'dn',
+          removeClicked: this.endSave.bind(this),
+          fileClicked: () => this.saveFileNameElement.focus(),
+        })}
+        ${this.sidebarExpanded
+          ? this.editor
+              ?.listFiles()
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
+              .map(f =>
+                file({
+                  ...f,
+                  fileClicked: this.loadFile,
+                  removeClicked: this.deleteFile,
+                })
+              )
+          : ''}
       </div>
     `;
   }
