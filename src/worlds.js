@@ -158,3 +158,94 @@ export function worldsFactory(onChange, defaultId = '10x10') {
     },
   };
 }
+
+export async function worldsFactoryFB(onChange, defaultId = '8x8') {
+  const worlds = [
+    '15x15',
+    '7x7',
+    '7x12',
+    '5x5',
+    '4x4',
+    '3x3',
+    'collectWood',
+    'safePickup',
+    'clean1',
+    'clean2',
+    'windstorm1',
+    'windstorm2',
+    'column1',
+    'column2',
+  ].map(id => ({ id }));
+  let currentId = defaultId;
+  let currentOption = 0;
+  // let currentWorld = {};
+  let currentWorld = await loadWorld(currentId);
+  return {
+    get currentId() {
+      return currentId;
+    },
+    get currentWorld() {
+      return currentWorld;
+    },
+    /**
+     * @returns {{id:string, options:{start, solution?}[]}}
+     */
+    get worlds() {
+      return worlds;
+    },
+    /**
+     * @returns {{id:string, options:{start, solution?}[]}}
+     */
+    select: async id => {
+      currentId = id;
+      currentWorld = await loadWorld(id);
+      onChange(currentWorld, id);
+      return currentWorld;
+    },
+  };
+}
+
+function loadDoc(url) {
+  return new Promise((resolve, reject) => {
+    var request;
+
+    if (window.XMLHttpRequest) {
+      request = new XMLHttpRequest(); // Firefox, Safari, ...
+    } else if (window.ActiveXObject) {
+      request = new ActiveXObject('Microsoft.XMLHTTP'); // Internet Explorer
+    }
+    request.open('GET', url, false);
+    request.send(null);
+    if (request.status == 404) {
+      reject('file not found');
+    }
+    resolve(request.responseText);
+  });
+}
+
+export async function loadWorld(fname) {
+  const lines = (await loadDoc('worlds/' + fname + '.w')).split('\n');
+  let defs = {
+    dimensions: [8, 8],
+    karel: { cell: [1, 1], direction: 'e' },
+    beepers: [],
+  };
+
+  const commands = {
+    dimension: (w, h) => (defs.dimensions = [parseInt(w), parseInt(h)]),
+    karel: (x, y) => (defs.karel.cell = [parseInt(x), parseInt(y)]),
+    beeper: (x, y) => defs.beepers.push([parseInt(x), parseInt(y)]),
+  };
+
+  lines.forEach(l => {
+    const [command, argsString] = l.split(':');
+    if (!command || !argsString) return;
+    const args = argsString
+      .replace(/[\(\)]/gm, '')
+      .split(',')
+      .map(x => x.trim());
+    commands[command.toLowerCase()]?.(...args);
+  });
+
+  return fixWorldIndexing(defs);
+}

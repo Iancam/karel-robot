@@ -122,6 +122,7 @@ const karel = ({ karel }, validateCell) => {
  *  @param {karelState} initialState
  */
 export default initialState => {
+  console.log(initialState);
   const validateCell = validCell(initialState);
   const { diffHandler: changeBeepers, checkCell: beepersAt } = beepers(
     initialState

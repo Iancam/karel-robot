@@ -82,7 +82,7 @@ export class FileSidebar extends LitElement {
   }
 
   openSave() {
-    this.toggleSidebar();
+    !this.sidebarExpanded && this.toggleSidebar();
     this.newFile = true;
     // wait for the saveFileNameElement to show
     const saveCommitted = e => {
@@ -90,7 +90,6 @@ export class FileSidebar extends LitElement {
         e.preventDefault();
         const filename = this.saveFileNameElement.textContent;
         this.editor.save(filename, {
-          language: this.language,
           date: new Date(),
           world: this.world,
         });
@@ -109,6 +108,7 @@ export class FileSidebar extends LitElement {
   }
 
   endSave() {
+    console.log(this._saveCommittedRef);
     window.removeEventListener('keydown', this._saveCommittedRef, false);
     this.sidebarExpanded = false;
     this.newFile = false;
@@ -135,32 +135,36 @@ export class FileSidebar extends LitElement {
     this.sidebarExpanded = !this.sidebarExpanded;
     if (this.sidebarExpanded) {
       this._handler = this.handleExitClick.bind(this);
-
       window.addEventListener('click', this._handler, false);
     }
     if (!this.sidebarExpanded) {
       this.newFile = false;
+      console.log('removing');
       window.removeEventListener('click', this._handler, false);
     }
     this.requestUpdate();
   };
 
   loadFile = fname => {
-    const { language, world, code } = this.editor.load(fname);
-    this.editor.setCode(code);
-    this.editor.setLanguage(language);
+    const { world } = this.editor.load(fname);
     this.updateWorld(world);
     this.setToast('tada!');
     this.requestUpdate();
-    this.sidebarExpanded = false;
+    this.toggleSidebar();
   };
 
   deleteFile = fname => {
-    this.setToast(
-      'Oh, goodbye then ' + ((Math.random() > 0.5 ? 'Mr. ' : 'Ms. ') + fname)
-    );
-    this.editor?.remove(fname);
-    this.requestUpdate();
+    if (
+      window.confirm(
+        'This will delete your file, friend.\n Are you Sure you want to do that?'
+      )
+    ) {
+      this.setToast(
+        'Oh, goodbye then ' + ((Math.random() > 0.5 ? 'Mr. ' : 'Ms. ') + fname)
+      );
+      this.editor?.remove(fname);
+      this.requestUpdate();
+    }
   };
 
   render() {
@@ -173,17 +177,17 @@ export class FileSidebar extends LitElement {
           : 'w2'}"
       >
         <div class="dib marginFix">
-          <div
+          <!-- <div
             @click=${this.toggleSidebar}
             class="${this.sidebarExpanded
-              ? 'bg-gold hover-bg-orange fl'
-              : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
-          ></div>
-          <div
+            ? 'bg-gold hover-bg-orange fl'
+            : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
+          ></div> -->
+          <!-- <div
             @click=${this.openSave}
             class=${(this.sidebarExpanded ? 'fl ' : '') +
-            'bg-green hover-bg-yellow bg-animate pointer w2 h2'}
-          ></div>
+          'bg-green hover-bg-yellow bg-animate pointer w2 h2'}
+          ></div> -->
         </div>
         ${file({
           name: '',

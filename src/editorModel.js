@@ -8,14 +8,19 @@ export async function EditorModel(monacoEditor, options) {
     // your code goes here!
   }`,
     python: `def main():
-    \t#your code goes here!`,
+    # your code goes here!`,
   };
 
   const that = {
-    setLanguage: function (lang) {
+    setLanguage: function (nextLanguage) {
+      if (!nextLanguage) console.trace('language is missing in setLanguage');
       let model = editor.getModel();
-      language = lang;
-      monaco.editor.setModelLanguage(model, lang);
+      if (this.getCode() === starterCode[language]) {
+        this.setCode(starterCode[nextLanguage]);
+      }
+      language = nextLanguage;
+
+      monaco.editor.setModelLanguage(model, nextLanguage);
       this.updateSession();
     },
 
@@ -72,14 +77,14 @@ export async function EditorModel(monacoEditor, options) {
     },
 
     loadSession: function () {
-      const { code, language: lang } = JSON.parse(
+      const { code, language } = JSON.parse(
         localStorage.getItem('sessionCode')
       ) ?? {
-        code: starterCode[lang],
+        code: starterCode[language],
         language,
       };
       this.setCode(code);
-      this.setLanguage(lang);
+      this.setLanguage(language);
     },
     /**
      *
@@ -90,12 +95,15 @@ export async function EditorModel(monacoEditor, options) {
       const code = this.getCode();
       localStorage.setItem(
         'file::' + fileName,
-        JSON.stringify({ code, name: fileName, ...options })
+        JSON.stringify({ code, name: fileName, language, ...options })
       );
     },
 
     load: function (fileName) {
       const results = JSON.parse(localStorage.getItem('file::' + fileName));
+      const { language, code } = results;
+      this.setCode(code);
+      this.setLanguage(language);
       openFile = fileName;
       return results;
     },

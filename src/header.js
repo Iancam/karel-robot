@@ -1,6 +1,6 @@
 import { worldsView } from './worldsView';
 import { html } from 'lit-element';
-export const header = ({
+export const header = async ({
   handleRun,
   reset,
   toast,
@@ -9,24 +9,24 @@ export const header = ({
   language,
   worlds,
   speed,
-  showingLessons,
-  toggleShowingLessons,
+  // showingLessons,
+  // toggleShowingLessons,
   overlay,
 }) => {
-  const lessonsToggle = html`<div
-    @click=${toggleShowingLessons}
-    class="dark-gray bg-orange hover-bg-light-orange dib pa2 mr2 ttc"
-  >
-    ${showingLessons ? 'worlds' : 'lessons'}
-  </div>`;
-  const showSolution = solution => html`<div
-    @mouseover=${() => overlay(solution?.world)}
-    @mouseout=${() => overlay()}
-    @click=${() => worlds.select(solution.id)}
-    class="dark-gray bg-yellow hover-bg-light-yellow dib pa2 mr2"
-  >
-    ${solution.id}
-  </div>`;
+  // const lessonsToggle = html`<div
+  //   @click=${toggleShowingLessons}
+  //   class="dark-gray bg-orange hover-bg-light-orange dib pa2 mr2 ttc"
+  // >
+  //   ${showingLessons ? 'worlds' : 'lessons'}
+  // </div>`;
+  // const showSolution = solution => html`<div
+  //   @mouseover=${() => overlay(solution?.world)}
+  //   @mouseout=${() => overlay()}
+  //   @click=${() => worlds.select(solution.id)}
+  //   class="dark-gray bg-yellow hover-bg-light-yellow dib pa2 mr2"
+  // >
+  //   ${solution.id}
+  // </div>`;
 
   const languagesSelector = html`<select
     class="mr2"
@@ -71,7 +71,6 @@ export const header = ({
 
     <!-- right hand side -->
     <div class="order-2 mr2 ml-auto">
-      ${worlds.lessonOptions.map(option => showSolution(option))}
       <label class="mr2" htmlFor="">speed</label>
       <input
         class="mr2"
@@ -84,14 +83,11 @@ export const header = ({
       />
 
       ${worldsView({
-        worlds: (showingLessons ? worlds.lessons : worlds.worlds).map(
-          lesson => lesson.id
-        ),
+        worlds: worlds.worlds.map(lesson => lesson.id),
         onSelect: worlds.select,
         selected: worlds.currentId,
         className: 'mr3 pa1 br0',
       })}
-      ${lessonsToggle}
     </div>
   </div>`;
 };
