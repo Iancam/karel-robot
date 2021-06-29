@@ -1,7 +1,0 @@
-Dimension: (5,5)
-Beeper:(1,2)
-Beeper:(1,2)
-Beeper:(1,2)
-Beeper:(1,2)
-Beeper:(1,5)
-Beeper:(1,2)
