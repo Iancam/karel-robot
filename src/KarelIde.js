@@ -115,23 +115,21 @@ export class KarelIde extends LitElement {
           width: min(50vw, 75vh);
           height: min(50vw, 75vh);
         }
+        .mr-25 {
+          margin-right: 25vw;
+        }
+        .vw-100 {
+          width: 100vw;
+        }
+        .ma-auto {
+          margin: auto;
+        }
+        .a-ic {
+          align-items: center;
+        }
       `,
+      show,
     ];
-    //     .mr-25 {
-    //       margin-right: 25vw;
-    //     }
-    //     .vw-100 {
-    //       width: 100vw;
-    //     }
-    //     .ma-auto {
-    //       margin: auto;
-    //     }
-    //     .a-ic {
-    //       align-items: center;
-    //     }
-    //   `,
-    //   show,
-    // ];
   }
 
   get canvasAlt() {
@@ -192,11 +190,6 @@ export class KarelIde extends LitElement {
   }
 
   render() {
-    return html` ${karelView({
-      displayAltCanvas: this.displayAltCanvas,
-      index: this.index,
-      indexes: this.indexes,
-    })}`;
     const headerr = async () =>
       header({
         handleRun: this.handleRun,

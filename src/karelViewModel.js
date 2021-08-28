@@ -10,7 +10,7 @@ import { toDegrees, vAdd, vMul } from './utils';
 const draw = (canvas, karelState) => {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const [nrows, ncols] = karelState.dimensions;
+  const [nrows, ncols] = karelState.dimension;
   const cellSize = nrows > ncols ? canvas.width / nrows : canvas.height / ncols;
 
   const [startX, endX] = worldBounds(canvas.width, ncols, cellSize);

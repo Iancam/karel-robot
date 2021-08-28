@@ -16,7 +16,7 @@ import { cloneDeep } from 'lodash-es';
  * @typedef {{cell:coord, direction: dir}} karel
  * @typedef {[{ cell:coord, count:number}]} beepers
  * @typedef {{
- *  dimensions:coord,
+ *  dimension:coord,
  *  walls:[coord],
  *  beepers:[{
  *    cell:coord,
@@ -35,7 +35,7 @@ import { cloneDeep } from 'lodash-es';
  * @param {coord}
  * @returns {{value:boolean, msg: string?}} validation
  */
-const validCell = ({ dimensions: [xDim, yDim], walls }) => ([cx, cy]) => {
+const validCell = ({ dimension: [xDim, yDim], walls }) => ([cx, cy]) => {
   if (walls)
     for (let [wx, wy] of walls) {
       if (wx === cx && wy == cy)

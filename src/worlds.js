@@ -1,14 +1,14 @@
 import { range, keyBy, values } from 'lodash-es';
 import { vSub } from './utils';
 const defaults = {
-  dimensions: [8, 8],
+  dimension: [8, 8],
   karel: { cell: [1, 1], direction: 'e' },
   beepers: [],
 };
 const _worlds = range(1, 16).map(i => ({
   id: `${i}x${i}`,
   world: {
-    dimensions: [i, i],
+    dimension: [i, i],
   },
 }));
 
@@ -20,7 +20,7 @@ const _groups = [
       {
         id: 'newspaper',
         start: {
-          dimensions: [5, 5],
+          dimension: [5, 5],
           walls: [
             [2, 2],
             [2, 2],
@@ -49,7 +49,7 @@ const _groups = [
     options: [[2, 5, 7], [3, 5, 8], [2]].map((columns, i) => ({
       id: 'column ' + i,
       start: {
-        dimensions: [8, 8],
+        dimension: [8, 8],
         beepers: columns.map(x => [1, x]),
       },
       solution: {
@@ -67,7 +67,7 @@ const _groups = [
       id: world.id + ' Midpoint',
       start: world.world,
       solution: {
-        beepers: [[1, Math.floor(world.world.dimensions[0] / 2)]],
+        beepers: [[1, Math.floor(world.world.dimension[0] / 2)]],
       },
     })),
   },
@@ -97,6 +97,7 @@ function fixWorldIndexing(world) {
       ...world.karel,
       cell: transform(world.karel?.cell ?? defaults.karel.cell),
     },
+    dimension: world.dimension || [8, 8],
     beepers:
       world.beepers?.map(transform).map(cell => ({ cell, count: 1 })) || [],
     walls: world.walls?.map(transform) || [],
@@ -226,13 +227,13 @@ function loadDoc(url) {
 export async function loadWorld(fname) {
   const lines = (await loadDoc('public/worlds/' + fname + '.w')).split('\n');
   let defs = {
-    dimensions: [8, 8],
+    dimension: [8, 8],
     karel: { cell: [1, 1], direction: 'e' },
     beepers: [],
   };
 
   const commands = {
-    dimension: (w, h) => (defs.dimensions = [parseInt(w), parseInt(h)]),
+    dimension: (w, h) => (defs.dimension = [parseInt(w), parseInt(h)]),
     karel: (x, y) => (defs.karel.cell = [parseInt(x), parseInt(y)]),
     beeper: (x, y) => defs.beepers.push([parseInt(x), parseInt(y)]),
   };
@@ -246,6 +247,6 @@ export async function loadWorld(fname) {
       .map(x => x.trim());
     commands[command.toLowerCase()]?.(...args);
   });
-
+  console.log(fixWorldIndexing(defs));
   return fixWorldIndexing(defs);
 }
