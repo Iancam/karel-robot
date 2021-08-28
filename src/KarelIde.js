@@ -112,64 +112,30 @@ export class KarelIde extends LitElement {
       tachyons,
       css`
         .square {
-          width: min(50vw, 80vh);
-          height: min(50vw, 80vh);
-        }
-        .mr-25 {
-          margin-right: 25vw;
-        }
-        .vw-100 {
-          width: 100vw;
-        }
-        .ma-auto {
-          margin: auto;
-        }
-        .a-ic {
-          align-items: center;
+          width: min(50vw, 75vh);
+          height: min(50vw, 75vh);
         }
       `,
-      show,
     ];
-  }
-  get canvas() {
-    return this.shadowRoot.querySelector('#canvas');
+    //     .mr-25 {
+    //       margin-right: 25vw;
+    //     }
+    //     .vw-100 {
+    //       width: 100vw;
+    //     }
+    //     .ma-auto {
+    //       margin: auto;
+    //     }
+    //     .a-ic {
+    //       align-items: center;
+    //     }
+    //   `,
+    //   show,
+    // ];
   }
 
   get canvasAlt() {
     return this.shadowRoot.querySelector('#canvasAlt');
-  }
-
-  // allows canvas sizing to be determined by css
-  async handleResize(canvas) {
-    canvas ??= this.canvas;
-    if (canvas === null) {
-      return;
-    }
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    // If it's resolution does not match change it
-    const resolutionMatch = canvas.width === width && canvas.height === height;
-    if (!resolutionMatch) {
-      console.log('adjusting canvas');
-      canvas.width = width;
-      canvas.height = height;
-    }
-    const world = this.state || (await this.worlds).currentWorld;
-    console.log(world);
-    // this.index !== undefined && this.index(this.index());
-    draw(this.canvas, world);
-  }
-  connectedCallback() {
-    super.connectedCallback();
-    this._resizers = (() => {
-      this.handleResize(this.canvas);
-      this.handleResize(this.canvasAlt);
-    }).bind(this);
-    window.addEventListener('resize', this._resizers);
-  }
-  disconnectedCallback() {
-    window.removeEventListener('resize', this._resizers);
-    super.disconnectedCallback();
   }
 
   overlay(karelState) {
@@ -183,54 +149,83 @@ export class KarelIde extends LitElement {
     }
   }
 
+  get canvas() {
+    return this.shadowRoot.querySelector('#canvas');
+  }
+
+  // allows canvas sizing to be determined by css
+  async handleResize(canvas) {
+    canvas ??= this.canvas;
+    if (canvas === null) {
+      console.warn('null canvas');
+      return;
+    }
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    // If it's resolution does not match change it
+    const resolutionMatch = canvas.width === width && canvas.height === height;
+    if (!resolutionMatch) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    const world = this.state || (await this.worlds).currentWorld;
+    // this.index !== undefined && this.index(this.index());
+    draw(this.canvas, world);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._resizers = (() => {
+      this.handleResize(this.canvas);
+      this.handleResize(this.canvasAlt);
+    }).bind(this);
+    window.addEventListener('resize', this._resizers);
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('resize', this._resizers);
+    super.disconnectedCallback();
+  }
+
   firstUpdated() {
-    this.handleResize();
+    this.handleResize(this.canvas);
   }
 
   render() {
-    const content = async () => {
-      const stuff = html`
-        ${until(
-          header({
-            handleRun: this.handleRun,
-            reset: this.reset,
-            toast: this.toast,
-            updateLanguage: this.updateLanguage.bind(this),
-            languages: this.languages,
-            language: this.language,
-            speed: this.speed,
-            showingLessons: this.showingLessons,
-            toggleShowingLessons: () =>
-              (this.showingLessons = !this.showingLessons),
-            worlds: await this.worlds,
-            overlay: this.overlay.bind(this),
-          }),
-          html`loading`
-        )}
-        ${karelView({
-          displayAltCanvas: this.displayAltCanvas,
-          index: this.index,
-          indexes: this.indexes,
-        })}
-        <file-sidebar
-          .setToast=${toast => (this.toast = { msg: toast })}
-          .editor=${this.editor}
-          .updateWorld=${(await this.worlds).select.bind(this)}
-          .world=${(await this.worlds).currentId}
-        ></file-sidebar>
-      `;
-      setTimeout(() => {
-        this.handleResize(this.canvas);
-      }, 1);
-      return stuff;
-    };
-    return html`${until(
-      content(),
-      html`${karelView({
-        displayAltCanvas: this.displayAltCanvas,
-        index: this.index,
-        indexes: this.indexes,
-      })}`
-    )}`;
+    return html` ${karelView({
+      displayAltCanvas: this.displayAltCanvas,
+      index: this.index,
+      indexes: this.indexes,
+    })}`;
+    const headerr = async () =>
+      header({
+        handleRun: this.handleRun,
+        reset: this.reset,
+        toast: this.toast,
+        updateLanguage: this.updateLanguage.bind(this),
+        languages: this.languages,
+        language: this.language,
+        speed: this.speed,
+        showingLessons: this.showingLessons,
+        toggleShowingLessons: () =>
+          (this.showingLessons = !this.showingLessons),
+        worlds: await this.worlds,
+        overlay: this.overlay.bind(this),
+      });
+    const sidebarr = async () =>
+      html`<file-sidebar
+        .setToast=${toast => (this.toast = { msg: toast })}
+        .editor=${this.editor}
+        .updateWorld=${(await this.worlds).select.bind(this)}
+        .world=${(await this.worlds).currentId}
+      ></file-sidebar>`;
+
+    return html`${until(headerr(), 'loading')}
+    ${karelView({
+      displayAltCanvas: this.displayAltCanvas,
+      index: this.index,
+      indexes: this.indexes,
+    })}
+    ${until(sidebarr(), 'loading')}`;
   }
 }

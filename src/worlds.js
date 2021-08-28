@@ -224,7 +224,7 @@ function loadDoc(url) {
 }
 
 export async function loadWorld(fname) {
-  const lines = (await loadDoc('worlds/' + fname + '.w')).split('\n');
+  const lines = (await loadDoc('public/worlds/' + fname + '.w')).split('\n');
   let defs = {
     dimensions: [8, 8],
     karel: { cell: [1, 1], direction: 'e' },

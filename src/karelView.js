@@ -1,11 +1,11 @@
 import { html } from 'lit-element';
 export const karelView = ({ displayAltCanvas, index, indexes, className }) => {
-  return html`<div class=${className + ' mt5'}>
+  return html`<div class=${className || '' + ' mt5'}>
     <canvas
       id="canvasAlt"
       class="square ${displayAltCanvas ? 'bg-light-yellow' : 'absolute o-0'}"
     ></canvas>
-    <canvas id="canvas" class="square ${displayAltCanvas ? 'dn' : ''}"></canvas>
+    <canvas id="canvas" class="square${displayAltCanvas ? ' dn' : ''}"></canvas>
     <div class="db w-100">
       <input
         class="w-100"
