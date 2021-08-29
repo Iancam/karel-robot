@@ -78,14 +78,15 @@ const beepers = ({ beepers }) => {
   /**
    * @param {diff} param0
    */
-  function diffHandler({ beeper }) {
-    if (beeper) {
-      const { cell, count } = beeper;
+  function diffHandler(beeper) {
+    const { cell, count } = beeper;
+    console.log(beeper);
+    if (cell) {
       let xs = beeperLookup[cell[0]] || (beeperLookup[cell[0]] = {});
       xs[cell[1]] = (xs[cell[1]] || 0) + count;
       if (xs[cell[1]] < 0) throw 'karel cannot create anti-beepers (yet)';
     }
-
+    console.log(beeper);
     return toList(beeperLookup);
   }
 

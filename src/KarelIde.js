@@ -78,7 +78,7 @@ export class KarelIde extends LitElement {
       );
       const handleTransition = (state, diff) => {
         this.editor.highlightLine(diff?.lineNumber, 'bg-gold');
-        console.log(diff);
+        console.log(state);
         state.error
           ? (this.toast = { msg: state.error, error: true })
           : draw(this.canvas, state);
