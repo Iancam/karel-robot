@@ -54,7 +54,15 @@ const validCell = ({ dimension: [xDim, yDim], walls }) => ([cx, cy]) => {
 const beepers = ({ beepers }) => {
   const beeperLookup = {};
 
-  beepers && beepers.forEach(diffHandler);
+  console.log(beepers);
+  if (beepers) {
+    beepers.forEach(({ cell: [x, y], count }) => {
+      const xs = beeperLookup[x] || (beeperLookup[x] = {});
+      console.log(xs);
+      xs[y] = (xs[y] || 0) + count;
+    });
+    beepers.forEach(diffHandler);
+  }
 
   function toList(beeperLookup) {
     return Object.keys(beeperLookup)
@@ -76,17 +84,20 @@ const beepers = ({ beepers }) => {
   }
 
   /**
-   * @param {diff} param0
+   * @param {diff} Unknown
    */
-  function diffHandler(beeper) {
-    const { cell, count } = beeper;
-    console.log(beeper);
+  function diffHandler(diff) {
+    if (!diff.beeper) {
+      return beepers;
+    }
+    const { cell, count } = diff.beeper;
     if (cell) {
+      console.log('beeper called');
+
       let xs = beeperLookup[cell[0]] || (beeperLookup[cell[0]] = {});
       xs[cell[1]] = (xs[cell[1]] || 0) + count;
       if (xs[cell[1]] < 0) throw 'karel cannot create anti-beepers (yet)';
     }
-    console.log(beeper);
     return toList(beeperLookup);
   }
 
@@ -123,7 +134,6 @@ const karel = ({ karel }, validateCell) => {
  *  @param {karelState} initialState
  */
 export default initialState => {
-  console.log(initialState);
   const validateCell = validCell(initialState);
   const { diffHandler: changeBeepers, checkCell: beepersAt } = beepers(
     initialState

@@ -12,7 +12,6 @@ export function codeToStates(code, language, world, interpret) {
   }
   const transpiledCode = languageMap[language](code);
   const lineNumberCode = addLineNumbers(transpiledCode);
-  console.log(world);
   const { getDiffs, getStates, engine } = recorderDecorator(karelModel(world), {
     ignoreUndefined: true,
     max: 2500,

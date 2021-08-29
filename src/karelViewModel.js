@@ -18,7 +18,6 @@ const draw = (canvas, karelState) => {
 
   drawKarel(karelState.karel);
   drawWorld(karelState);
-  console.log(karelState.beepers);
   karelState.beepers.forEach(drawBeeper);
 
   function worldBounds(length, numDivisions, cellSize) {
@@ -97,7 +96,6 @@ const draw = (canvas, karelState) => {
   }
 
   function drawBeeper({ cell, count }) {
-    console.log('ding');
     if (!count) return;
     const center = cellCenter(...cell);
     const handle = cellHandle(...cell);

@@ -273,6 +273,5 @@ export async function loadWorld(fname) {
     commands[command.toLowerCase()]?.(...args);
   });
   Object.entries(beepersCount);
-  console.log(fixWorldIndexing(defs));
   return fixWorldIndexing(defs);
 }
