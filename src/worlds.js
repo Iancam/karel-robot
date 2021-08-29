@@ -99,7 +99,19 @@ function fixWorldIndexing(world) {
     },
     dimension: world.dimension || [8, 8],
     beepers:
-      world.beepers?.map(transform).map(cell => ({ cell, count: 1 })) || [],
+      world.beepers?.map(beeper => {
+        const { cell, count } = beeper;
+
+        return cell
+          ? {
+              cell: transform(cell),
+              count,
+            }
+          : {
+              cell: transform(beeper),
+              count: 1,
+            };
+      }) || [],
     walls: world.walls?.map(transform) || [],
   };
 }
@@ -232,10 +244,23 @@ export async function loadWorld(fname) {
     beepers: [],
   };
 
+  const beepersCount = {};
+
   const commands = {
     dimension: (w, h) => (defs.dimension = [parseInt(w), parseInt(h)]),
     karel: (x, y) => (defs.karel.cell = [parseInt(x), parseInt(y)]),
-    beeper: (x, y) => defs.beepers.push([parseInt(x), parseInt(y)]),
+    beeper: (x, y) => {
+      let found = false;
+      defs.beepers.forEach(({ cell: [x1, y1] }, i) => {
+        if (x1 === x && y1 === y) {
+          defs.beepers[i].count++;
+          found = true;
+        }
+      });
+      if (!found) {
+        defs.beepers.push({ cell: [x, y], count: 1 });
+      }
+    },
   };
 
   lines.forEach(l => {
@@ -247,6 +272,7 @@ export async function loadWorld(fname) {
       .map(x => x.trim());
     commands[command.toLowerCase()]?.(...args);
   });
+  Object.entries(beepersCount);
   console.log(fixWorldIndexing(defs));
   return fixWorldIndexing(defs);
 }

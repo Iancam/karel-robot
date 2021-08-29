@@ -69,7 +69,6 @@ export class KarelIde extends LitElement {
   }
 
   async handleRun() {
-    console.log(this.worlds);
     try {
       this.reset && this.reset();
       const { states, diffs } = codeToStates(
