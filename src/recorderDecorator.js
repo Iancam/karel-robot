@@ -18,7 +18,7 @@ export const recorderDecorator = (diffEngine, options) => {
         try {
           const nextState = diffEngine(diff);
           states.push(cloneDeep(nextState));
-          if (states.length > 5000)
+          if (states.length > options.max)
             throw 'karel is tired. Is karel in an infinite loop?';
         } catch (error) {
           states.push({ error });

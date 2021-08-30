@@ -53,8 +53,6 @@ const validCell = ({ dimension: [xDim, yDim], walls }) => ([cx, cy]) => {
  */
 const beepers = ({ beepers }) => {
   const beeperLookup = {};
-
-  console.log(beepers);
   if (beepers) {
     beepers.forEach(({ cell: [x, y], count }) => {
       const xs = beeperLookup[x] || (beeperLookup[x] = {});
@@ -74,12 +72,14 @@ const beepers = ({ beepers }) => {
           };
         })
       )
-      .flat();
+      .flat()
+      .filter(({ count }) => count > 0);
   }
 
   function checkCell(cell) {
     const [x, y] = cell;
     const beeper = beeperLookup[x] && beeperLookup[x][y];
+    console.log(beeper);
     return { cell, count: beeper?.count || 0 };
   }
 
@@ -88,16 +88,20 @@ const beepers = ({ beepers }) => {
    */
   function diffHandler(diff) {
     if (!diff.beeper) {
-      return beepers;
+      return toList(beeperLookup);
     }
-    const { cell, count } = diff.beeper;
-    if (cell) {
+    const {
+      cell: [x, y],
+      count,
+    } = diff.beeper;
+    if (count) {
       console.log('beeper called');
-
-      let xs = beeperLookup[cell[0]] || (beeperLookup[cell[0]] = {});
-      xs[cell[1]] = (xs[cell[1]] || 0) + count;
-      if (xs[cell[1]] < 0) throw 'karel cannot create anti-beepers (yet)';
+      let xs = beeperLookup[x]; //|| (beeperLookup[x] = {});
+      xs[y] = (xs[y] || 0) + count;
+      console.log(toList(beeperLookup));
+      if (xs[y] < 0) throw 'karel cannot create anti-beepers (yet)';
     }
+    console.log(beeperLookup);
     return toList(beeperLookup);
   }
 
@@ -146,14 +150,17 @@ export default initialState => {
    * this means a list of diffs it'll be easy to do time travel!
    */
   const returnValue = diff => {
+    console.log(diff);
     const karel = changeKarel(diff || {});
-    return {
+    const retval = {
       ...initialState,
       validateCell,
       beepersAt,
       beepers: changeBeepers(diff || {}),
       karel,
     };
+    console.log(retval);
+    return retval;
   };
   return returnValue;
 };
