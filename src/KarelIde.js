@@ -42,11 +42,11 @@ export class KarelIde extends LitElement {
   }
 
   languages = [
-    // {
-    //   index: 0,
-    //   value: 'python',
-    //   text: 'Python',
-    // },
+    {
+      index: 0,
+      value: 'python',
+      text: 'Python',
+    },
     {
       index: 1,
       value: 'javascript',
