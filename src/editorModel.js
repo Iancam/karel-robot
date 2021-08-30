@@ -77,14 +77,15 @@ export async function EditorModel(monacoEditor, options) {
     },
 
     loadSession: function () {
-      const { code, language } = JSON.parse(
-        localStorage.getItem('sessionCode')
+      const lang = language;
+      const { code, language: languagee } = JSON.parse(
+        window.localStorage.getItem('sessionCode')
       ) ?? {
-        code: starterCode[language],
-        language,
+        code: starterCode[lang],
+        language: lang,
       };
       this.setCode(code);
-      this.setLanguage(language);
+      this.setLanguage(languagee);
     },
     /**
      *
