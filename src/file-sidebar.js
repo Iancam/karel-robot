@@ -84,36 +84,14 @@ export class FileSidebar extends LitElement {
   openSave() {
     !this.sidebarExpanded && this.toggleSidebar();
     this.newFile = true;
+    const filename = window.prompt('what should we save it as?');
+    if (!filename) return;
     // wait for the saveFileNameElement to show
-    const saveCommitted = e => {
-      if (e.key == 'Enter') {
-        e.preventDefault();
-        const filename = this.saveFileNameElement.textContent;
-        this.editor.save(filename, {
-          date: new Date(),
-          world: this.world,
-        });
-        this.setToast('We saved your file: ' + filename + '!');
-        this.endSave();
-      } else if (e.key === 'Escape') {
-        this.endSave();
-      }
-    };
-    this.requestUpdate().then(() => {
-      this.saveFileNameElement.focus();
-      const bound = saveCommitted.bind(this);
-      this._saveCommittedRef = bound;
-      window.addEventListener('keydown', bound, false);
+    this.editor.save(filename, {
+      date: new Date(),
+      world: this.world,
     });
-  }
-
-  endSave() {
-    console.log(this._saveCommittedRef);
-    window.removeEventListener('keydown', this._saveCommittedRef, false);
-    this.sidebarExpanded = false;
-    this.newFile = false;
-    this.saveFileNameElement.blur();
-    this.saveFileNameElement.textContent = '';
+    this.setToast('We saved your file: ' + filename + '!');
     this.requestUpdate();
   }
 
@@ -177,27 +155,18 @@ export class FileSidebar extends LitElement {
           : 'w2'}"
       >
         <div class="dib marginFix">
-          <!-- <div
+          <div
             @click=${this.toggleSidebar}
             class="${this.sidebarExpanded
-            ? 'bg-gold hover-bg-orange fl'
-            : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
-          ></div> -->
-          <!-- <div
+              ? 'bg-gold hover-bg-orange fl'
+              : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
+          ></div>
+          <div
             @click=${this.openSave}
             class=${(this.sidebarExpanded ? 'fl ' : '') +
-          'bg-green hover-bg-yellow bg-animate pointer w2 h2'}
-          ></div> -->
+            'bg-green hover-bg-yellow bg-animate pointer w2 h2'}
+          ></div>
         </div>
-        ${file({
-          name: '',
-          getName: true,
-          date: new Date(),
-          language: this.editor?.language(),
-          className: this.newFile ? 'db' : 'dn',
-          removeClicked: this.endSave.bind(this),
-          fileClicked: () => this.saveFileNameElement.focus(),
-        })}
         ${this.sidebarExpanded
           ? this.editor
               ?.listFiles()

@@ -96,7 +96,7 @@ const beepers = ({ beepers }) => {
     } = diff.beeper;
     if (count) {
       console.log('beeper called');
-      let xs = beeperLookup[x]; //|| (beeperLookup[x] = {});
+      let xs = beeperLookup[x] || (beeperLookup[x] = {});
       xs[y] = (xs[y] || 0) + count;
       console.log(toList(beeperLookup));
       if (xs[y] < 0) throw 'karel cannot create anti-beepers (yet)';
