@@ -78,9 +78,9 @@ const beepers = ({ beepers }) => {
 
   function checkCell(cell) {
     const [x, y] = cell;
-    const beeper = beeperLookup[x] && beeperLookup[x][y];
-    console.log(beeper);
-    return { cell, count: beeper?.count || 0 };
+    const count = beeperLookup[x] && beeperLookup[x][y];
+    console.log(count);
+    return { cell, count: count || 0 };
   }
 
   /**
@@ -101,7 +101,6 @@ const beepers = ({ beepers }) => {
       console.log(toList(beeperLookup));
       if (xs[y] < 0) throw 'karel cannot create anti-beepers (yet)';
     }
-    console.log(beeperLookup);
     return toList(beeperLookup);
   }
 
