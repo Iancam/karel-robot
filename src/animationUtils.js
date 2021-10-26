@@ -37,7 +37,7 @@ export const animatery = (speed, update) => {
         if (!animating) return false;
         if (last === undefined) last = ts;
         const timeDiff = ts - last;
-        if (timeDiff > speed) {
+        if (timeDiff > 500 - speed) {
           if (!update(index++)) return;
           last = ts;
         }

@@ -79,7 +79,6 @@ const beepers = ({ beepers }) => {
   function checkCell(cell) {
     const [x, y] = cell;
     const count = beeperLookup[x] && beeperLookup[x][y];
-    console.log(count);
     return { cell, count: count || 0 };
   }
 
@@ -95,10 +94,8 @@ const beepers = ({ beepers }) => {
       count,
     } = diff.beeper;
     if (count) {
-      console.log('beeper called');
       let xs = beeperLookup[x] || (beeperLookup[x] = {});
       xs[y] = (xs[y] || 0) + count;
-      console.log(toList(beeperLookup));
       if (xs[y] < 0) throw 'karel cannot create anti-beepers (yet)';
     }
     return toList(beeperLookup);
@@ -149,7 +146,6 @@ export default initialState => {
    * this means a list of diffs it'll be easy to do time travel!
    */
   const returnValue = diff => {
-    console.log(diff);
     const karel = changeKarel(diff || {});
     const retval = {
       ...initialState,
@@ -158,7 +154,6 @@ export default initialState => {
       beepers: changeBeepers(diff || {}),
       karel,
     };
-    console.log(retval);
     return retval;
   };
   return returnValue;

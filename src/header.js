@@ -78,8 +78,8 @@ export const header = async ({
         min="0"
         step="1"
         value=${speed ? speed() : 0}
-        max=${500}
-        @input=${e => speed?.(500 - e.target.value)}
+        max="500"
+        @input=${e => speed?.(e.target.value)}
       />
 
       ${worldsView({
