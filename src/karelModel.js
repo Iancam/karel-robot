@@ -35,12 +35,33 @@ import { cloneDeep } from 'lodash-es';
  * @param {coord}
  * @returns {{value:boolean, msg: string?}} validation
  */
-const validCell = ({ dimension: [xDim, yDim], walls }) => ([cx, cy]) => {
-  if (walls)
-    for (let [wx, wy] of walls) {
-      if (wx === cx && wy == cy)
+const validCell = ({ dimension: [xDim, yDim], walls }) => ([cx, cy], move) => {
+  if (walls && move) {
+    const [dx, dy] = move;
+    for (let {
+      cell: [wx, wy],
+      side,
+    } of walls) {
+      let blocked = false;
+      if (side === 'west' && dx === 1 && cx === wx - 1 && cy === wy)
+        blocked = true;
+      if (side === 'west' && dx === -1 && cx === wx && cy === wy)
+        blocked = true;
+      if (side === 'south' && dy === -1 && cx === wx && cy === wy)
+        blocked = true;
+      if (side === 'south' && dy === 1 && cx === wx && cy === wy - 1)
+        blocked = true;
+      if (side === 'east' && dx === -1 && cx === wx + 1 && cy === wy)
+        blocked = true;
+      if (side === 'east' && dx === 1 && cx === wx && cy === wy) blocked = true;
+      if (side === 'north' && dy === 1 && cx === wx && cy === wy)
+        blocked = true;
+      if (side === 'north' && dy === -1 && cx === wx && cy === wy + 1)
+        blocked = true;
+      if (blocked)
         return { value: false, msg: 'karel cannot walk through walls' };
     }
+  }
   if (cx >= xDim || cx < 0 || cy >= yDim || cy < 0)
     return { value: false, msg: 'karel cannot breath in space' };
 
@@ -120,7 +141,7 @@ const karel = ({ karel }, validateCell) => {
 
     if (move) {
       const newCell = vAdd(karelState.cell, move);
-      const validation = validateCell(newCell);
+      const validation = validateCell(newCell, move);
       if (validation.value) karelState.cell = newCell;
       else throw validation.msg;
     }

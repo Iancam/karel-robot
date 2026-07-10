@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit-element';
 import tachyons from './tachyons.min.css';
 import draw from './karelViewModel';
 import './file-sidebar';
-import { worldsFactory, worldsFactoryFB } from './worlds';
+import { worldsFactoryFB } from './worlds';
 import { show } from './show.css';
 import { header } from './header';
 import { karelView } from './karelView';
@@ -76,6 +76,7 @@ export class KarelIde extends LitElement {
         this.language,
         (await this.worlds).currentWorld
       );
+
       const handleTransition = (state, diff) => {
         this.editor.highlightLine(diff?.lineNumber, 'bg-gold');
         state.error
@@ -165,6 +166,7 @@ export class KarelIde extends LitElement {
       canvas.height = height;
     }
     const world = this.state || (await this.worlds).currentWorld;
+
     // this.index !== undefined && this.index(this.index());
     draw(this.canvas, world);
   }

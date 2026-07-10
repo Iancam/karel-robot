@@ -18,6 +18,7 @@ const draw = (canvas, karelState) => {
 
   drawKarel(karelState.karel);
   drawWorld(karelState);
+  if (karelState.walls) karelState.walls.forEach(drawWall);
   karelState.beepers.forEach(drawBeeper);
 
   function worldBounds(length, numDivisions, cellSize) {
@@ -88,11 +89,20 @@ const draw = (canvas, karelState) => {
     for (let col = 0; col <= ncols; col++) {
       line([startX + col * cellSize, startY, startX + col * cellSize, endY]);
     }
+    const fontSize = Math.max(8, cellSize / 5);
+    ctx.save();
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.textBaseline = 'bottom';
+    ctx.textAlign = 'left';
     for (let i = 0; i < ncols; i++) {
       for (let j = 0; j < nrows; j++) {
         drawCenter(i, j);
+        const [x, y] = cellHandle(i, j);
+        ctx.fillText(`${i + 1},${j + 1}`, x + 2, y + cellSize - 2);
       }
     }
+    ctx.restore();
   }
 
   function drawBeeper({ cell, count }) {
@@ -118,6 +128,31 @@ const draw = (canvas, karelState) => {
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillText(count, ...center);
+  }
+
+  function drawWall({ cell: [col, row], side }) {
+    const [x, y] = cellHandle(col, row);
+    const wallThickness = Math.max(3, cellSize / 12);
+    ctx.save();
+    ctx.strokeStyle = '#e63946';
+    ctx.lineWidth = wallThickness;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    if (side === 'west') {
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y + cellSize);
+    } else if (side === 'south') {
+      ctx.moveTo(x, y + cellSize);
+      ctx.lineTo(x + cellSize, y + cellSize);
+    } else if (side === 'east') {
+      ctx.moveTo(x + cellSize, y);
+      ctx.lineTo(x + cellSize, y + cellSize);
+    } else if (side === 'north') {
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + cellSize, y);
+    }
+    ctx.stroke();
+    ctx.restore();
   }
 
   function line(coords) {
