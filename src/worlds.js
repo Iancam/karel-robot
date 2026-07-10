@@ -218,60 +218,49 @@ export async function worldsFactoryFB(onChange, defaultId = '8x8') {
   };
 }
 
-function loadDoc(url) {
-  return new Promise((resolve, reject) => {
-    var request;
-
-    if (window.XMLHttpRequest) {
-      request = new XMLHttpRequest(); // Firefox, Safari, ...
-    } else if (window.ActiveXObject) {
-      request = new ActiveXObject('Microsoft.XMLHTTP'); // Internet Explorer
-    }
-    request.open('GET', url, false);
-    request.send(null);
-    if (request.status == 404) {
-      reject('file not found');
-    }
-    resolve(request.responseText);
-  });
-}
-
 export async function loadWorld(fname) {
-  const lines = (await loadDoc('public/worlds/' + fname + '.w')).split('\n');
-  let defs = {
-    dimension: [8, 8],
-    karel: { cell: [1, 1], direction: 'e' },
-    beepers: [],
-  };
+  try {
+    const response = await fetch('public/worlds/' + fname + '.w');
+    const text = await response.text();
+    const lines = text.split('\n');
 
-  const beepersCount = {};
+    let defs = {
+      dimension: [8, 8],
+      karel: { cell: [1, 1], direction: 'e' },
+      beepers: [],
+    };
 
-  const commands = {
-    dimension: (w, h) => (defs.dimension = [parseInt(w), parseInt(h)]),
-    karel: (x, y) => (defs.karel.cell = [parseInt(x), parseInt(y)]),
-    beeper: (x, y) => {
-      let found = false;
-      defs.beepers.forEach(({ cell: [x1, y1] }, i) => {
-        if (x1 === x && y1 === y) {
-          defs.beepers[i].count++;
-          found = true;
+    const beepersCount = {};
+
+    const commands = {
+      dimension: (w, h) => (defs.dimension = [parseInt(w), parseInt(h)]),
+      karel: (x, y) => (defs.karel.cell = [parseInt(x), parseInt(y)]),
+      beeper: (x, y) => {
+        let found = false;
+        defs.beepers.forEach(({ cell: [x1, y1] }, i) => {
+          if (x1 === x && y1 === y) {
+            defs.beepers[i].count++;
+            found = true;
+          }
+        });
+        if (!found) {
+          defs.beepers.push({ cell: [x, y], count: 1 });
         }
-      });
-      if (!found) {
-        defs.beepers.push({ cell: [x, y], count: 1 });
-      }
-    },
-  };
+      },
+    };
 
-  lines.forEach(l => {
-    const [command, argsString] = l.split(':');
-    if (!command || !argsString) return;
-    const args = argsString
-      .replace(/[\(\)]/gm, '')
-      .split(',')
-      .map(x => x.trim());
-    commands[command.toLowerCase()]?.(...args);
-  });
-  Object.entries(beepersCount);
-  return fixWorldIndexing(defs);
+    lines.forEach(l => {
+      const [command, argsString] = l.split(':');
+      if (!command || !argsString) return;
+      const args = argsString
+        .replace(/[\(\)]/gm, '')
+        .split(',')
+        .map(x => x.trim());
+      commands[command.toLowerCase()]?.(...args);
+    });
+    Object.entries(beepersCount);
+    return fixWorldIndexing(defs);
+  } catch (e) {
+    console.log(e);
+  }
 }
