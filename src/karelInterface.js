@@ -26,15 +26,15 @@ export const Karel = {
  * @param {{string:karelInterfaceFunction}} iface
  * @param {*} nameHandler
  */
-function negateInterface(iface, nameHandler = k => 'not' + capitalize(k)) {
-  return Object.entries(iface)
-    .map(([k, fx]) => {
-      const newName = nameHandler(k);
-      const [diff, value] = fx();
-      return [newName, () => [{ [newName]: diff[k] }, !value]];
-    })
-    .reduce(toObject, {});
-}
+// function negateInterface(iface, nameHandler = k => 'not' + capitalize(k)) {
+//   return Object.entries(iface)
+//     .map(([k, fx]) => {
+//       const newName = nameHandler(k);
+//       const [diff, value] = fx();
+//       return [newName, () => [{ [newName]: diff[k] }, !value]];
+//     })
+//     .reduce(toObject, {});
+// }
 
 /**
  * @typedef {(args)=>([import('./karelModel').diff, any?])} karelInterfaceFunction
@@ -63,28 +63,34 @@ export default function karelInterface(karelEngine, options = {}) {
     .reduce(toObject, {});
 
   const clearInterface = Object.keys(turns)
-    .map(key => [
-      (key === 'around' ? 'back' : key) + 'IsClear',
-      () => {
-        const funcName = (key === 'around' ? 'back' : key) + 'IsClear';
-        const { validateCell, karel } = karelEngine();
-        const adjunctCell = vAdd(
-          directionTranslator(karel.direction + turns[key]).move,
-          karel.cell
-        );
-        return [
-          {
-            [funcName]: adjunctCell,
-          },
-          validateCell(adjunctCell).value,
-        ];
-      },
-    ])
+    .map(key => {
+      const funcName = (key === 'around' ? 'back' : key) + 'IsClear';
+      const result = [
+        funcName,
+        () => {
+          const { validateCell, karel } = karelEngine();
+          const adjunctCell = vAdd(
+            directionTranslator(karel.direction + turns[key]).move,
+            karel.cell
+          );
+          return [
+            {
+              [funcName]: adjunctCell,
+            },
+            validateCell(
+              adjunctCell,
+              directionTranslator(karel.direction + turns[key]).move
+            ).value,
+          ];
+        },
+      ];
+      return result;
+    })
     .reduce(toObject, {});
 
-  const blockedInterface = negateInterface(clearInterface, k => {
-    return k.slice(undefined, k.length - 5) + 'Blocked';
-  });
+  // const blockedInterface = negateInterface(clearInterface, k => {
+  //   return k.slice(undefined, k.length - 5) + 'Blocked';
+  // });
 
   const facingInterface = directions
     .map(({ name }, i) => [
@@ -96,13 +102,13 @@ export default function karelInterface(karelEngine, options = {}) {
     ])
     .reduce(toObject, {});
 
-  const notFacingInterface = negateInterface(facingInterface);
+  // const notFacingInterface = negateInterface(facingInterface);
 
   const karelInterface = {
     ...clearInterface,
-    ...blockedInterface,
+    // ...blockedInterface,
     ...facingInterface,
-    ...notFacingInterface,
+    // ...notFacingInterface,
     ...turnsInterface,
     move: () => {
       const { direction } = karelEngine().karel;

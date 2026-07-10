@@ -35,7 +35,10 @@ import { cloneDeep } from 'lodash-es';
  * @param {coord}
  * @returns {{value:boolean, msg: string?}} validation
  */
-const validCell = ({ dimension: [xDim, yDim], walls }) => ([cx, cy], move) => {
+const validCell = ({ dimension: [xDim, yDim], walls }) => (
+  [destX, destY],
+  move
+) => {
   if (walls && move) {
     const [dx, dy] = move;
     for (let {
@@ -43,26 +46,19 @@ const validCell = ({ dimension: [xDim, yDim], walls }) => ([cx, cy], move) => {
       side,
     } of walls) {
       let blocked = false;
-      if (side === 'west' && dx === 1 && cx === wx - 1 && cy === wy)
+      if (side === 'west' && dx === 1 && destX === wx && destY === wy)
         blocked = true;
-      if (side === 'west' && dx === -1 && cx === wx && cy === wy)
+      if (side === 'west' && dx === -1 && destX === wx - 1 && destY === wy)
         blocked = true;
-      if (side === 'south' && dy === -1 && cx === wx && cy === wy)
+      if (side === 'south' && dy === -1 && destX === wx && destY === wy - 1)
         blocked = true;
-      if (side === 'south' && dy === 1 && cx === wx && cy === wy - 1)
-        blocked = true;
-      if (side === 'east' && dx === -1 && cx === wx + 1 && cy === wy)
-        blocked = true;
-      if (side === 'east' && dx === 1 && cx === wx && cy === wy) blocked = true;
-      if (side === 'north' && dy === 1 && cx === wx && cy === wy)
-        blocked = true;
-      if (side === 'north' && dy === -1 && cx === wx && cy === wy + 1)
+      if (side === 'south' && dy === 1 && destX === wx && destY === wy)
         blocked = true;
       if (blocked)
         return { value: false, msg: 'karel cannot walk through walls' };
     }
   }
-  if (cx >= xDim || cx < 0 || cy >= yDim || cy < 0)
+  if (destX >= xDim || destX < 0 || destY >= yDim || destY < 0)
     return { value: false, msg: 'karel cannot breath in space' };
 
   return { value: true };
