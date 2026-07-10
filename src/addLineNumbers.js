@@ -8,7 +8,8 @@ export const addLineNumbers = code => {
         return line;
       }
       return line.replace(/[\w\d]+\(\)/g, match => {
-        return `${match.slice(undefined, -2)}({lineNumber:${i + 1}})`;
+        const functionName = match.slice(undefined, -2);
+        return `${functionName}({lineNumber:${i + 1}})`;
       });
     })
     .join('\n');

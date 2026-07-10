@@ -159,13 +159,48 @@ export class FileSidebar extends LitElement {
             @click=${this.toggleSidebar}
             class="${this.sidebarExpanded
               ? 'bg-gold hover-bg-orange fl'
-              : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2"
-          ></div>
+              : 'bg-orange hover-bg-gold'} bg-animate pointer w2 h2 flex items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="pointer-events:none"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+            </svg>
+          </div>
           <div
             @click=${this.openSave}
             class=${(this.sidebarExpanded ? 'fl ' : '') +
-            'bg-green hover-bg-yellow bg-animate pointer w2 h2'}
-          ></div>
+            'bg-green hover-bg-yellow bg-animate pointer w2 h2 flex items-center justify-center'}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="pointer-events:none"
+            >
+              <path
+                d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+              />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+          </div>
         </div>
         ${this.sidebarExpanded
           ? this.editor
